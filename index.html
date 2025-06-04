@@ -110,36 +110,41 @@ function maskAddress(address) {
       .then(response => response.json())
       .then(calls => {
         const tbody = document.querySelector('#data-table tbody');
-        calls.sort((a, b) => new Date(b.ResponseDate) - new Date(a.ResponseDate));
-        calls.forEach(call => {
-          if ((call.Disposition || "").toLowerCase().includes("z-call not entered in cad")) return;
+      const now = new Date();
+const threeHoursAgo = new Date(now.getTime() - 3 * 60 * 60 * 1000);
 
-          const maskedAddress = maskAddress(call.Address || "");
+calls
+  .filter(call => {
+    const callTime = new Date(call.ResponseDate);
+    return callTime >= threeHoursAgo &&
+           callTime <= now &&
+           !(call.Disposition || "").toLowerCase().includes("z-call not entered in cad");
+  })
+  .sort((a, b) => new Date(b.ResponseDate) - new Date(a.ResponseDate))
+  .forEach(call => {
+    const maskedAddress = maskAddress(call.Address || "");
+    const icon = L.divIcon({
+      className: 'custom-icon',
+      html: `<div style="font-size: 24px;">${getIcon(call.Problem || "")}</div>`
+    });
 
-         const icon = L.divIcon({
-  className: 'custom-icon',
-  html: `<div style="font-size: 24px;">${getIcon(call.Problem || "")}</div>`
-});
+    const marker = L.marker([call.Latitude, call.Longitude], { icon }).addTo(map);
+    marker.bindPopup(
+      `<div style="font-size: 16px;"><b>${new Date(call.ResponseDate).toLocaleString()}</b><br>${call.Problem}<br>${maskedAddress}<br>${call.Disposition}</div>`
+    );
 
+    const row = document.createElement('tr');
+    row.innerHTML = `
+       <td>${call.incidentnumber}</td>
+      <td>${new Date(call.ResponseDate).toLocaleString()}</td>
+      <td>${call.Problem}</td>
+      <td>${maskedAddress}</td>
+      <td>${call.Disposition}</td>
+    `;
+    row.onclick = () => map.setView([call.Latitude, call.Longitude], 15);
+    document.querySelector('#data-table tbody').appendChild(row);
+  });
 
-          const marker = L.marker([call.Latitude, call.Longitude], { icon }).addTo(map);
-         marker.bindPopup(
-  `<div style="font-size: 16px;"><b>${new Date(call.ResponseDate).toLocaleString()}</b><br>${call.Problem}<br>${maskedAddress}<br>${call.Disposition}</div>`
-);
-
-
-          const row = document.createElement('tr');
-       row.innerHTML = `
-  <td>${new Date(call.ResponseDate).toLocaleString()}</td>
-  <td>${call.Problem}</td>
-  <td>${maskedAddress}</td>
-  <td>${call.Disposition}</td>
-  <td>${call.IncidentNumber}</td>
-`;
-
-          row.onclick = () => map.setView([call.Latitude, call.Longitude], 15);
-          tbody.appendChild(row);
-        });
       });
   </script>
 </body>
