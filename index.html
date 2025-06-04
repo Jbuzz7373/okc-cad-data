@@ -1,97 +1,82 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>OKC CAD Calls Map</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <meta charset="utf-8">
+  <title>CAD Calls Map</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
   <style>
-    #map {
-      height: 600px;
-      width: 100%;
-    }
+    #map { height: 500px; width: 100%; margin-bottom: 20px; }
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 20px;
     }
     th, td {
       border: 1px solid #ccc;
-      padding: 8px;
+      padding: 6px;
       text-align: left;
     }
     th {
-      background-color: #f2f2f2;
+      background: #eee;
     }
   </style>
 </head>
 <body>
-  <h1>Oklahoma City CAD Calls (Live)</h1>
-  <div id="map"></div>
-  <table>
-    <thead>
-      <tr>
-        <th>Incident #</th>
-        <th>Response Date</th>
-        <th>Problem</th>
-        <th>Description</th>
-        <th>Address</th>
-        <th>Disposition</th>
-        <th>Cancel Reason</th>
-      </tr>
-    </thead>
-    <tbody id="call-table"></tbody>
-  </table>
 
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  <script>
-    const map = L.map('map').setView([35.4676, -97.5164], 11);
+<h2>CAD Calls Map</h2>
+<div id="map"></div>
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 18,
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
+<h3>CAD Call Details (Most Recent First)</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th>Response Date</th>
+      <th>Problem</th>
+      <th>Cancel Reason</th>
+      <th>Disposition</th>
+    </tr>
+  </thead>
+  <tbody id="call-table-body"></tbody>
+</table>
 
-    fetch("https://raw.githubusercontent.com/Jbuzz7373/okc-cad-data/main/CadCalls.json")
-      .then(response => response.json())
-      .then(data => {
-        const tableBody = document.getElementById("call-table");
+<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+<script>
+const map = L.map('map').setView([35.4676, -97.5164], 11);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© OpenStreetMap contributors'
+}).addTo(map);
 
-        data.forEach(call => {
-          if (call.Latitude && call.longitude) {
-            L.marker([call.Latitude, call.longitude])
-              .addTo(map)
-              .bindPopup(`
-                <strong>Incident:</strong> ${call.IncidentNumber}<br>
-                <strong>Time:</strong> ${new Date(call.ResponseDate).toLocaleString()}<br>
-                <strong>Problem:</strong> ${call.Problem}<br>
-                <strong>Description:</strong> ${call.Description}<br>
-                <strong>Address:</strong> ${call.Address}<br>
-                <strong>Disposition:</strong> ${call.Disposition}<br>
-                <strong>Cancel Reason:</strong> ${call.CancelCloseReason}
-              `);
+// Load the data from GitHub raw link
+fetch('https://raw.githubusercontent.com/Jbuzz7373/okc-cad-data/main/CadCalls.json')
+  .then(response => response.json())
+  .then(data => {
+    // Sort by ResponseDate descending
+    data.sort((a, b) => new Date(b.ResponseDate) - new Date(a.ResponseDate));
 
-            // Add label to map
-            L.tooltip({ permanent: true, direction: 'top', offset: [0, -10] })
-              .setLatLng([call.Latitude, call.longitude])
-              .setContent(`${call.IncidentNumber}`)
-              .addTo(map);
-          }
+    const table = document.getElementById('call-table-body');
 
-          const row = document.createElement("tr");
-          row.innerHTML = `
-            <td>${call.IncidentNumber}</td>
-            <td>${new Date(call.ResponseDate).toLocaleString()}</td>
-            <td>${call.Problem}</td>
-            <td>${call.Description}</td>
-            <td>${call.Address}</td>
-            <td>${call.Disposition}</td>
-            <td>${call.CancelCloseReason}</td>
-          `;
-          tableBody.appendChild(row);
-        });
-      })
-      .catch(err => console.error("Failed to fetch CAD data:", err));
-  </script>
+    data.forEach(call => {
+      // Map marker
+      if (call.Latitude && call.longitude) {
+        L.marker([call.Latitude, call.longitude])
+          .addTo(map)
+          .bindPopup(`<strong>${call.Problem}</strong><br>${call.Address}<br>${new Date(call.ResponseDate).toLocaleString()}`);
+
+      }
+
+      // Table row
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${call.IncidentNumber}</td>
+        <td>${new Date(call.ResponseDate).toLocaleString()}</td>
+        <td>${call.Problem}</td>
+        <td>${call.CancelCloseReason}</td>
+        <td>${call.Disposition}</td>
+      `;
+      table.appendChild(row);
+    });
+  });
+</script>
+
 </body>
 </html>
