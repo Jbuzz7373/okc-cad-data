@@ -8,12 +8,13 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
-    #map { height: 600px; }
+    body { margin: 0; font-family: Arial, sans-serif; }
+    #map { height: 600px; position: relative; z-index: 1; }
     #legend {
       position: absolute;
       top: 10px;
       right: 10px;
-      z-index: 1000 !important;
+      z-index: 1001;
       background: white;
       padding: 10px;
       border: 1px solid #ccc;
@@ -47,7 +48,8 @@
     🎗 Domestic<br>
     🚘🍷 DUI<br>
     🚫 Trespass<br>
-    📣 Disturbance
+    📣 Disturbance<br>
+    🤜 Assault
   </div>
   <table id="data-table">
     <thead>
@@ -63,9 +65,9 @@
 
   <script>
     function maskAddress(address) {
-      return address.replace(/\b(\d{5})(?=\s)/, function(m) { return m.slice(0, 3) + 'XX'; })
-                    .replace(/\b(\d{4})(?=\s)/, function(m) { return m.slice(0, 2) + 'XX'; })
-                    .replace(/\b(\d{3})(?=\s)/, function(m) { return m.slice(0, 1) + 'XX'; })
+      return address.replace(/\b(\d{5})(?=\s)/, (m) => m.slice(0, 3) + 'XX')
+                    .replace(/\b(\d{4})(?=\s)/, (m) => m.slice(0, 2) + 'XX')
+                    .replace(/\b(\d{3})(?=\s)/, (m) => m.slice(0, 1) + 'XX')
                     .replace(/\b(\d{2})(?=\s)/, 'XX');
     }
 
@@ -99,13 +101,13 @@
         const tbody = document.querySelector('#data-table tbody');
         calls.sort((a, b) => new Date(b.ResponseDate) - new Date(a.ResponseDate));
         calls.forEach(call => {
-          if (call.Disposition === 'z-CALL NOT ENTERED IN CAD') return;
+          if ((call.Disposition || "").toLowerCase().includes("z-call not entered in cad")) return;
 
-          const maskedAddress = maskAddress(call.Address);
+          const maskedAddress = maskAddress(call.Address || "");
 
           const icon = L.divIcon({
             className: 'custom-icon',
-            html: `<div style="font-size: 24px;">${getIcon(call.Problem)}</div>`
+            html: `<div style="font-size: 24px;">${getIcon(call.Problem || "")}</div>`
           });
 
           const marker = L.marker([call.Latitude, call.Longitude], { icon }).addTo(map);
