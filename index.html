@@ -1,155 +1,128 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="refresh" content="300" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Oklahoma City CAD Calls</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
-    #map { height: 500px; width: 100%; }
-    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-    th, td { border: 1px solid #ddd; padding: 8px; font-size: 14px; }
-    th { background-color: #f2f2f2; text-align: left; }
-    tr:hover { background-color: #f1f1f1; cursor: pointer; }
-    .legend {
+    #map { height: 600px; }
+    #legend {
       position: absolute;
       top: 10px;
       right: 10px;
+      z-index: 1000 !important;
       background: white;
       padding: 10px;
-      line-height: 1.5em;
-      font-size: 14px;
       border: 1px solid #ccc;
       border-radius: 5px;
+      font-size: 14px;
+      line-height: 1.6;
     }
-    .legend img { vertical-align: middle; width: 20px; height: 20px; margin-right: 6px; }
-  
-#legend {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  z-index: 1000;
-  background: white;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 14px;
-  line-height: 1.6;
-}
-
-#legend {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  z-index: 1000 !important;
-  background: white;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 14px;
-  line-height: 1.6;
-}
-</style>
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      padding: 8px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    th { background-color: #f2f2f2; }
+  </style>
 </head>
 <body>
-  <h2>Oklahoma City CAD Calls</h2>
   <div id="map"></div>
-  <div class="legend" id="legend"></div>
-  <h3>Call Table</h3>
-  <table id="callTable">
+  <div id="legend">
+    <strong>Legend</strong><br>
+    🚓 Traffic Stop<br>
+    📞 911 Call<br>
+    🚨 Alarm<br>
+    🎭 Burglary<br>
+    🧥 White Collar<br>
+    🪟 Vandalism<br>
+    🎗 Domestic<br>
+    🚘🍷 DUI<br>
+    🚫 Trespass<br>
+    📣 Disturbance
+  </div>
+  <table id="data-table">
     <thead>
       <tr>
-        <th>Incident #</th>
-        <th>Response Date</th>
+        <th>Time</th>
         <th>Problem</th>
-        <th>Description</th>
         <th>Address</th>
         <th>Disposition</th>
-        <th>Call Result</th>
       </tr>
     </thead>
     <tbody></tbody>
   </table>
 
-  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
   <script>
-    const iconMap = {
-      "911": "https://cdn-icons-png.flaticon.com/512/1034/1034131.png",
-      "ASSAULT": "https://cdn-icons-png.flaticon.com/512/1809/1809383.png",
-      "TRAFFIC": "https://cdn-icons-png.flaticon.com/512/743/743007.png",
-      "ACCIDENT": "https://cdn-icons-png.flaticon.com/512/942/942748.png",
-      "ALARM": "https://cdn-icons-png.flaticon.com/512/1046/1046776.png",
-      "BURGLARY": "https://cdn-icons-png.flaticon.com/512/809/809957.png",
-      "WHITE COLLAR": "https://cdn-icons-png.flaticon.com/512/1041/1041916.png",
-      "VANDALISM": "https://cdn-icons-png.flaticon.com/512/1041/1041974.png",
-      "DOMESTIC": "https://cdn-icons-png.flaticon.com/512/2857/2857380.png",
-      "DUI": "https://cdn-icons-png.flaticon.com/512/1034/1034351.png",
-      "TRESPASS": "https://cdn-icons-png.flaticon.com/512/2203/2203187.png",
-      "DISTURBANCE": "https://cdn-icons-png.flaticon.com/512/1683/1683539.png"
-    };
+    function maskAddress(address) {
+      return address.replace(/\b(\d{5})(?=\s)/, function(m) { return m.slice(0, 3) + 'XX'; })
+                    .replace(/\b(\d{4})(?=\s)/, function(m) { return m.slice(0, 2) + 'XX'; })
+                    .replace(/\b(\d{3})(?=\s)/, function(m) { return m.slice(0, 1) + 'XX'; })
+                    .replace(/\b(\d{2})(?=\s)/, 'XX');
+    }
+
+    function getIcon(problem) {
+      if (/assault/i.test(problem)) return "🤜";
+      if (/traffic stop/i.test(problem)) return "🚓";
+      if (/911/i.test(problem)) return "📞";
+      if (/alarm/i.test(problem)) return "🚨";
+      if (/burglary/i.test(problem)) return "🎭";
+      if (/white collar/i.test(problem)) return "🧥";
+      if (/vandalism/i.test(problem)) return "🪟";
+      if (/domestic/i.test(problem)) return "🎗";
+      if (/drunk|dui/i.test(problem)) return "🚘🍷";
+      if (/trespass/i.test(problem)) return "🚫";
+      if (/disturb/i.test(problem)) return "📣";
+      return "📍";
+    }
 
     const map = L.map('map', {
-  minZoom: 10,
-  maxZoom: 15
-}).setView([35.4676, -97.5164], 11);
+      minZoom: 10,
+      maxZoom: 15
+    }).setView([35.4676, -97.5164], 11);
+
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    fetch('CadCalls.json')
+    fetch('https://your-domain.com/path/to/cadcalls.json')
       .then(response => response.json())
-      .then(data => {
-        const now = new Date();
-        const markers = [];
+      .then(calls => {
+        const tbody = document.querySelector('#data-table tbody');
+        calls.sort((a, b) => new Date(b.ResponseDate) - new Date(a.ResponseDate));
+        calls.forEach(call => {
+          if (call.Disposition === 'z-CALL NOT ENTERED IN CAD') return;
 
-        data.sort((a, b) => new Date(b.ResponseDate) - new Date(a.ResponseDate));
+          const maskedAddress = maskAddress(call.Address);
 
-        const tbody = document.querySelector("#callTable tbody");
-        data.forEach((call, i) => {
-          const callDate = new Date(call.ResponseDate);
-          const ageInMs = now - callDate;
-          const ageInHours = ageInMs / 3600000;
+          const icon = L.divIcon({
+            className: 'custom-icon',
+            html: `<div style="font-size: 24px;">${getIcon(call.Problem)}</div>`
+          });
 
-          const exclude = call.Disposition && call.Disposition.includes("z-CALL NOT ENTERED IN CAD");
-          if (!exclude && ageInHours <= 2) {
-            const iconKey = Object.keys(iconMap).find(key => call.Problem?.toUpperCase().includes(key));
-            const iconUrl = iconMap[iconKey] || "https://cdn-icons-png.flaticon.com/512/252/252025.png";
-
-            const icon = L.icon({ iconUrl, iconSize: [25, 25] });
-            const marker = L.marker([call.Latitude, call.Longitude], { icon }).addTo(map);
-            marker.bindPopup(
-              `<b>${new Date(call.ResponseDate).toLocaleString()}</b><br>${call.Problem}<br>${call.Address.replace(/\d{1,4}/, 'XX')}<br>${call.Disposition}`
-            );
-            markers.push(marker);
-            call._marker = marker;
-          }
+          const marker = L.marker([call.Latitude, call.Longitude], { icon }).addTo(map);
+          marker.bindPopup(
+            `<div style="font-size: 16px;"><b>${new Date(call.ResponseDate).toLocaleString()}</b><br>${call.Problem}<br>${maskedAddress}<br>${call.Disposition}</div>`
+          );
 
           const row = document.createElement('tr');
           row.innerHTML = `
-            <td>${call.IncidentNumber}</td>
             <td>${new Date(call.ResponseDate).toLocaleString()}</td>
             <td>${call.Problem}</td>
-            <td>${call.Description}</td>
-            <td>${call.Address.replace(/\d{1,4}/, 'XX')}</td>
+            <td>${maskedAddress}</td>
             <td>${call.Disposition}</td>
-            <td>${call.CallCompleteInfo}</td>
           `;
-          row.addEventListener('click', () => {
-            if (call._marker) {
-              map.setView(call._marker.getLatLng(), 15);
-              call._marker.openPopup();
-            }
-          });
+          row.onclick = () => map.setView([call.Latitude, call.Longitude], 15);
           tbody.appendChild(row);
         });
-
-        // Legend
-        const legendDiv = document.getElementById("legend");
-        legendDiv.innerHTML = "<b>Legend</b><br>";
-        for (const [key, url] of Object.entries(iconMap)) {
-          legendDiv.innerHTML += `<img src="${url}" alt="${key}"/> ${key}<br>`;
-        }
       });
   </script>
 </body>
