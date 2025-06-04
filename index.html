@@ -1,88 +1,93 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   <title>CAD Calls Map</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
-    #map { height: 500px; width: 100%; margin-bottom: 20px; }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 6px;
-      text-align: left;
-    }
-    th {
-      background: #eee;
-    }
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+    #map { height: 500px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+    th, td { border: 1px solid #ccc; padding: 6px; text-align: left; }
+    th { background-color: #f4f4f4; }
   </style>
 </head>
 <body>
 
-<h2>CAD Calls Map</h2>
-<div id="map"></div>
+  <h2 style="padding: 10px;">Oklahoma City CAD Calls</h2>
 
-<h3>CAD Call Details (Most Recent First)</h3>
-<table>
-  <thead>
-    <tr>
-      <th>Title</th>
-      <th>Response Date</th>
-      <th>Problem</th>
-      <th>Cancel Reason</th>
-      <th>Disposition</th>
-    </tr>
-  </thead>
-  <tbody id="call-table-body"></tbody>
-</table>
+  <div id="map"></div>
+  <table id="cadTable">
+    <thead>
+      <tr>
+        <th>Incident #</th>
+        <th>Response Date</th>
+        <th>Problem</th>
+        <th>Description</th>
+        <th>Address</th>
+        <th>Disposition</th>
+        <th>Cancel Reason</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 
-<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
-<script>
-const map = L.map('map').setView([35.4676, -97.5164], 11);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '© OpenStreetMap contributors'
-}).addTo(map);
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    const jsonUrl = "https://raw.githubusercontent.com/Jbuzz7373/okc-cad-data/main/CadCalls.json";
 
-// Load the data from GitHub raw link
-fetch('https://raw.githubusercontent.com/Jbuzz7373/okc-cad-data/main/CadCalls.json')
-  .then(response => response.json())
-  .then(data => {
-    // Sort by ResponseDate descending
-    data.sort((a, b) => new Date(b.ResponseDate) - new Date(a.ResponseDate));
+    function fetchAndRenderData() {
+      fetch(jsonUrl)
+        .then(response => response.json())
+        .then(data => {
+          const now = new Date();
+          const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000);
 
-    const table = document.getElementById('call-table-body');
+          // Clear previous map and table if needed
+          document.querySelector("#cadTable tbody").innerHTML = "";
 
-  const now = new Date();
-const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000); // 2 hours ago
+          // Sort all data (newest first)
+          data.sort((a, b) => new Date(b.ResponseDate) - new Date(a.ResponseDate));
 
-data.forEach(call => {
-  const callTime = new Date(call.ResponseDate);
+          // Initialize map (centered on OKC)
+          document.getElementById("map").innerHTML = ""; // Clear previous map
+          const map = L.map('map').setView([35.4676, -97.5164], 11);
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+          }).addTo(map);
 
-  // 🟢 Only add to the map if it's within the last 2 hours
-  if (callTime >= twoHoursAgo) {
-    const marker = L.marker([call.Latitude, call.longitude])
-      .bindPopup(`<strong>${call.Problem}</strong><br>${call.ResponseDate}`);
-    marker.addTo(map);
-  }
-});
+          data.forEach(call => {
+            // Add to table
+            const row = document.createElement("tr");
+            row.innerHTML = `
+              <td>${call.IncidentNumber || ""}</td>
+              <td>${new Date(call.ResponseDate).toLocaleString()}</td>
+              <td>${call.Problem || ""}</td>
+              <td>${call.Description || ""}</td>
+              <td>${call.Address || ""}</td>
+              <td>${call.Disposition || ""}</td>
+              <td>${call.CancelCloseReason || ""}</td>
+            `;
+            document.querySelector("#cadTable tbody").appendChild(row);
 
+            // Add to map if within last 2 hours
+            const responseTime = new Date(call.ResponseDate);
+            if (responseTime >= twoHoursAgo && call.Latitude && call.longitude) {
+              L.marker([call.Latitude, call.longitude])
+                .bindPopup(`<strong>${call.Problem}</strong><br>${call.Address || ""}<br>${new Date(call.ResponseDate).toLocaleTimeString()}`)
+                .addTo(map);
+            }
+          });
+        })
+        .catch(error => {
+          console.error("Error loading CAD data:", error);
+        });
+    }
 
-      // Table row
-      const row = document.createElement('tr');
-      row.innerHTML = `
-        <td>${call.IncidentNumber}</td>
-        <td>${new Date(call.ResponseDate).toLocaleString()}</td>
-        <td>${call.Problem}</td>
-        <td>${call.CancelCloseReason}</td>
-        <td>${call.Disposition}</td>
-      `;
-      table.appendChild(row);
-    });
-  });
-</script>
+    fetchAndRenderData();
+    setInterval(fetchAndRenderData, 5 * 60 * 1000); // Refresh every 5 minutes
+  </script>
 
 </body>
 </html>
