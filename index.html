@@ -78,7 +78,7 @@
               fillColor: color,
               fillOpacity: 0.8
             }).addTo(map);
-            marker.bindPopup(`<b>${call.Problem}</b><br>${call.Address}`);
+            marker.bindPopup(`<b>${new Date(call.ResponseDate).toLocaleString()}</b><br>${call.Problem}<br>${call.Address}<br>${call.Disposition}`);
           }
 
           // Always add to table
