@@ -82,45 +82,51 @@
         .filter(call => call.Disposition !== "z-CALL NOT ENTERED IN CAD")
         .sort((a, b) => new Date(b.ResponseDate) - new Date(a.ResponseDate));
 
-      filtered.forEach((call, index) => {
-        const callDate = new Date(call.ResponseDate);
-        let marker = null;
+     function maskAddressNumber(address) {
+  const match = address.match(/^(\d{3})\d{2}(.*)/);
+  return match ? `${match[1]}XX${match[2]}` : address;
+}
 
-        if (callDate > twoHoursAgo && call.Latitude && call.Longitude) {
-          const color = getColor(call.Description);
-          marker = L.circleMarker([call.Latitude, call.Longitude], {
-            radius: 8,
-            color: color,
-            fillColor: color,
-            fillOpacity: 0.8
-          }).addTo(map);
-          marker.bindPopup(
-            `<b>${new Date(call.ResponseDate).toLocaleString()}</b><br>${call.Problem}<br>${call.Address}<br>${call.Disposition}`
-          );
-        }
+filtered.forEach((call, index) => {
+  const callDate = new Date(call.ResponseDate);
+  let marker = null;
+  const maskedAddress = maskAddressNumber(call.Address || "");
 
-        markers.push(marker);
+  if (callDate > twoHoursAgo && call.Latitude && call.Longitude) {
+    const color = getColor(call.Description);
+    marker = L.circleMarker([call.Latitude, call.Longitude], {
+      radius: 8,
+      color: color,
+      fillColor: color,
+      fillOpacity: 0.8
+    }).addTo(map);
+    marker.bindPopup(
+      `<b>${new Date(call.ResponseDate).toLocaleString()}</b><br>${call.Problem}<br>${maskedAddress}<br>${call.Disposition}`
+    );
+  }
 
-        const row = document.createElement("tr");
-        row.id = `row-${index}`;
-        row.innerHTML = `
-          <td>${call.IncidentNumber}</td>
-          <td>${new Date(call.ResponseDate).toLocaleString()}</td>
-          <td>${call.Problem || ""}</td>
-          <td>${call.Description || ""}</td>
-          <td>${call.Address || ""}</td>
-          <td>${call.Disposition || ""}</td>
-          <td>${call.CallCompleteInfo || ""}</td>
-        `;
-        if (marker) {
-          row.addEventListener('click', () => {
-            map.setView(marker.getLatLng(), 16);
-            marker.openPopup();
-          });
-        }
-        tableBody.appendChild(row);
-      });
-    }
+  markers.push(marker);
+
+  const row = document.createElement("tr");
+  row.id = `row-${index}`;
+  row.innerHTML = `
+    <td>${call.IncidentNumber}</td>
+    <td>${new Date(call.ResponseDate).toLocaleString()}</td>
+    <td>${call.Problem || ""}</td>
+    <td>${call.Description || ""}</td>
+    <td>${maskedAddress}</td>
+    <td>${call.Disposition || ""}</td>
+    <td>${call.CallCompleteInfo || ""}</td>
+  `;
+  if (marker) {
+    row.addEventListener('click', () => {
+      map.setView(marker.getLatLng(), 16);
+      marker.openPopup();
+    });
+  }
+  tableBody.appendChild(row);
+});
+
 
     loadData();
     setInterval(loadData, 300000); // Refresh every 5 minutes
