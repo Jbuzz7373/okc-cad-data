@@ -96,7 +96,7 @@
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-  fetch('./cadcalls.json')
+  fetch('CadCalls.json?_=' + new Date().getTime())
 
       .then(response => response.json())
       .then(calls => {
