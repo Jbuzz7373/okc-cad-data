@@ -62,7 +62,10 @@
       const response = await fetch("CadCalls.json?_=" + new Date().getTime());
       const data = await response.json();
 
-      const map = L.map('map').setView([35.4676, -97.5164], 11);
+      const map = L.map('map', {
+  minZoom: 10,
+  maxZoom: 17
+}).setView([35.4676, -97.5164], 11);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors'
       }).addTo(map);
