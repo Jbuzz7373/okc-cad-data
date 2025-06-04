@@ -54,6 +54,7 @@
   <table id="data-table">
     <thead>
       <tr>
+        <th>Incident #</th>
         <th>Time</th>
         <th>Problem</th>
         <th>Address</th>
@@ -133,6 +134,7 @@ function maskAddress(address) {
   <td>${call.Problem}</td>
   <td>${maskedAddress}</td>
   <td>${call.Disposition}</td>
+  <td>${call.IncidentNumber}</td>
 `;
 
           row.onclick = () => map.setView([call.Latitude, call.Longitude], 15);
