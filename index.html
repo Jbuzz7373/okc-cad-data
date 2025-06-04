@@ -1,24 +1,35 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>CAD Calls Map</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <meta charset="UTF-8" />
+  <meta http-equiv="refresh" content="300" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OKC CAD Calls</title>
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
   <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
     #map { height: 500px; }
-    table { border-collapse: collapse; width: 100%; margin-top: 10px; }
-    th, td { border: 1px solid #ccc; padding: 6px; text-align: left; }
-    th { background-color: #f4f4f4; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 8px;
+      text-align: left;
+      border: 1px solid #ddd;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
   </style>
 </head>
 <body>
-
-  <h2 style="padding: 10px;">Oklahoma City CAD Calls</h2>
-
+  <h1>Oklahoma City CAD Calls</h1>
   <div id="map"></div>
-  <table id="cadTable">
+  <h2>Call Table</h2>
+  <table id="cad-table">
     <thead>
       <tr>
         <th>Incident #</th>
@@ -27,67 +38,78 @@
         <th>Description</th>
         <th>Address</th>
         <th>Disposition</th>
-        <th>Cancel Reason</th>
+        <th>Call Result</th>
       </tr>
     </thead>
     <tbody></tbody>
   </table>
 
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    const jsonUrl = "https://raw.githubusercontent.com/Jbuzz7373/okc-cad-data/main/CadCalls.json";
-
-    function fetchAndRenderData() {
-     fetch(jsonUrl + '?t=' + new Date().getTime())
-        .then(response => response.json())
-        .then(data => {
-          const now = new Date();
-          const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000);
-
-          // Clear previous map and table if needed
-          document.querySelector("#cadTable tbody").innerHTML = "";
-
-          // Sort all data (newest first)
-          data.sort((a, b) => new Date(b.ResponseDate) - new Date(a.ResponseDate));
-
-          // Initialize map (centered on OKC)
-          document.getElementById("map").innerHTML = ""; // Clear previous map
-          const map = L.map('map').setView([35.4676, -97.5164], 11);
-          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 18,
-          }).addTo(map);
-
-          data.forEach(call => {
-            // Add to table
-            const row = document.createElement("tr");
-            row.innerHTML = `
-              <td>${call.IncidentNumber || ""}</td>
-              <td>${new Date(call.ResponseDate).toLocaleString()}</td>
-              <td>${call.Problem || ""}</td>
-              <td>${call.Description || ""}</td>
-              <td>${call.Address || ""}</td>
-              <td>${call.Disposition || ""}</td>
-              <td>${call.CancelCloseReason || ""}</td>
-            `;
-            document.querySelector("#cadTable tbody").appendChild(row);
-
-            // Add to map if within last 2 hours
-            const responseTime = new Date(call.ResponseDate);
-            if (responseTime >= twoHoursAgo && call.Latitude && call.longitude) {
-              L.marker([call.Latitude, call.longitude])
-                .bindPopup(`<strong>${call.Problem}</strong><br>${call.Address || ""}<br>${new Date(call.ResponseDate).toLocaleTimeString()}`)
-                .addTo(map);
-            }
-          });
-        })
-        .catch(error => {
-          console.error("Error loading CAD data:", error);
-        });
+    async function fetchData() {
+      const res = await fetch("https://raw.githubusercontent.com/Jbuzz7373/okc-cad-data/main/CadCalls.json?ts=2025-06-04T13:31:49.215639");
+      const data = await res.json();
+      return data;
     }
 
-    fetchAndRenderData();
-    setInterval(fetchAndRenderData, 5 * 60 * 1000); // Refresh every 5 minutes
-  </script>
+    function isWithinLastTwoHours(dateStr) {
+      const callTime = new Date(dateStr);
+      const now = new Date();
+      const diffMs = now - callTime;
+      return diffMs <= 2 * 60 * 60 * 1000;
+    }
 
+    function populateTable(data) {
+      const tbody = document.querySelector("#cad-table tbody");
+      tbody.innerHTML = "";
+
+      const sorted = [...data].sort((a, b) => new Date(b.ResponseDate) - new Date(a.ResponseDate));
+
+      for (const call of sorted) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>{call.IncidentNumber}</td>
+          <td>{new Date(call.ResponseDate).toLocaleString()}</td>
+          <td>{call.Problem}</td>
+          <td>{call.Description}</td>
+          <td>{call.Address}</td>
+          <td>{call.Disposition}</td>
+          <td>{call.CallCompleteInfo}</td>
+        `;
+        tbody.appendChild(tr);
+      }
+    }
+
+    function populateMap(data) {
+      const map = L.map('map').setView([35.4676, -97.5164], 11);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(map);
+
+      const recent = data.filter(d => isWithinLastTwoHours(d.ResponseDate));
+
+      for (const call of recent) {
+        if (call.Latitude && call.Longitude) {
+          const marker = L.marker([call.Latitude, call.Longitude]).addTo(map);
+          marker.bindPopup(`
+            <strong>Problem:</strong> {call.Problem}<br>
+            <strong>Description:</strong> {call.Description}<br>
+            <strong>Address:</strong> {call.Address}<br>
+            <strong>Disposition:</strong> {call.Disposition}<br>
+            <strong>Call Result:</strong> {call.CallCompleteInfo}<br>
+            <strong>Response:</strong> {new Date(call.ResponseDate).toLocaleString()}
+          `);
+        }
+      }
+    }
+
+    (async () => {
+      const data = await fetchData();
+      populateTable(data);
+      populateMap(data);
+    })();
+  </script>
 </body>
 </html>
