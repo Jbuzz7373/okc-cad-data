@@ -96,7 +96,8 @@
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    fetch('https://your-domain.com/path/to/cadcalls.json')
+  fetch('./cadcalls.json')
+
       .then(response => response.json())
       .then(calls => {
         const tbody = document.querySelector('#data-table tbody');
