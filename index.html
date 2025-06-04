@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Live OKC CAD Calls</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    h1 { margin-bottom: 20px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background-color: #f2f2f2; }
+    tbody tr:hover { background-color: #f9f9f9; }
+  </style>
+</head>
+<body>
+
+  <h1>Live OKC CAD Calls</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Incident #</th>
+        <th>Response Date</th>
+        <th>Problem</th>
+        <th>Description</th>
+        <th>Address</th>
+        <th>Disposition</th>
+        <th>Cancel/Close Reason</th>
+        <th>Latitude</th>
+        <th>Longitude</th>
+      </tr>
+    </thead>
+    <tbody id="cad-body"></tbody>
+  </table>
+
+  <script>
+    fetch("https://raw.githubusercontent.com/Jbuzz7373/okc-cad-data/main/CadCalls.json")
+      .then(res => res.json())
+      .then(data => {
+        const body = document.getElementById("cad-body");
+        data.forEach(item => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${item.IncidentNumber || ""}</td>
+            <td>${item.ResponseDate || ""}</td>
+            <td>${item.Problem || ""}</td>
+            <td>${item.Description || ""}</td>
+            <td>${item.Address || ""}</td>
+            <td>${item.Disposition || ""}</td>
+            <td>${item.CancelCloseReason || ""}</td>
+            <td>${item.Latitude || ""}</td>
+            <td>${item.longitude || ""}</td>
+          `;
+          body.appendChild(row);
+        });
+      })
+      .catch(err => {
+        console.error("Failed to fetch CAD data:", err);
+        document.getElementById("cad-body").innerHTML = `<tr><td colspan="9">Error loading data</td></tr>`;
+      });
+  </script>
+
+</body>
+</html>
