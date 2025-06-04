@@ -58,7 +58,6 @@
         const tableBody = document.getElementById("call-table");
 
         data.forEach(call => {
-          // Add marker if lat/lng are present
           if (call.Latitude && call.longitude) {
             L.marker([call.Latitude, call.longitude])
               .addTo(map)
@@ -71,9 +70,14 @@
                 <strong>Disposition:</strong> ${call.Disposition}<br>
                 <strong>Cancel Reason:</strong> ${call.CancelCloseReason}
               `);
+
+            // Add label to map
+            L.tooltip({ permanent: true, direction: 'top', offset: [0, -10] })
+              .setLatLng([call.Latitude, call.longitude])
+              .setContent(`${call.IncidentNumber}`)
+              .addTo(map);
           }
 
-          // Add row to table
           const row = document.createElement("tr");
           row.innerHTML = `
             <td>${call.IncidentNumber}</td>
