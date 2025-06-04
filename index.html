@@ -64,13 +64,21 @@
   </table>
 
   <script>
-    function maskAddress(address) {
-      return address.replace(/\b(\d{5})(?=\s)/, (m) => m.slice(0, 3) + 'XX')
-                    .replace(/\b(\d{4})(?=\s)/, (m) => m.slice(0, 2) + 'XX')
-                    .replace(/\b(\d{3})(?=\s)/, (m) => m.slice(0, 1) + 'XX')
-                    .replace(/\b(\d{2})(?=\s)/, 'XX')
-                    .replace(/\b(\d{1})(?=\s)/, 'X');
-    }
+function maskAddress(address) {
+  return address.replace(/\b(\d{1,5})(?=(-\d{1,5}))/g, (m) => {
+      // Mask the first number in a range (before the hyphen)
+      if (m.length === 5) return m.slice(0, 3) + 'XX';
+      if (m.length === 4) return m.slice(0, 2) + 'XX';
+      if (m.length === 3) return m.slice(0, 1) + 'XX';
+      return 'X'.repeat(m.length);
+    })
+    .replace(/\b(\d{5})(?=\s)/g, (m) => m.slice(0, 3) + 'XX')
+    .replace(/\b(\d{4})(?=\s)/g, (m) => m.slice(0, 2) + 'XX')
+    .replace(/\b(\d{3})(?=\s)/g, (m) => m.slice(0, 1) + 'XX')
+    .replace(/\b(\d{2})(?=\s)/g, 'XX')
+    .replace(/\b(\d{1})(?=\s)/g, 'X');
+}
+
 
     function getIcon(problem) {
       if (/assault/i.test(problem)) return "🤜";
