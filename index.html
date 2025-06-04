@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Live OKC CAD Calls</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: Arial; margin: 20px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { padding: 8px; border: 1px solid #ccc; text-align: left; }
+    th { background-color: #eee; }
+  </style>
+</head>
+<body>
+
+  <h1>Live CAD Calls</h1>
+  <table id="cadTable">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Response Date</th>
+        <th>Problem</th>
+        <th>Cancel Reason</th>
+        <th>Disposition</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    fetch('https://raw.githubusercontent.com/Jbuzz7373/okc-cad-data/main/CadCalls.json')
+      .then(response => response.json())
+      .then(data => {
+        const tbody = document.querySelector("#cadTable tbody");
+        data.forEach(item => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${item.Title || ""}</td>
+            <td>${item.Response_Date || ""}</td>
+            <td>${item.Problem || ""}</td>
+            <td>${item.Cancel_Reason || ""}</td>
+            <td>${item.Call_Disposition || ""}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      })
+      .catch(err => console.error("Error loading data:", err));
+  </script>
+
+</body>
+</html>
