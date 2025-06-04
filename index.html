@@ -111,15 +111,27 @@ function maskAddress(address) {
       .then(response => response.json())
       .then(calls => {
         const tbody = document.querySelector('#data-table tbody');
-      const now = new Date();
+const now = new Date();
 const threeHoursAgo = new Date(now.getTime() - 3 * 60 * 60 * 1000);
+const thirtyMinutesAgo = new Date(now.getTime() - 30 * 60 * 1000);
 
 calls
   .filter(call => {
     const callTime = new Date(call.ResponseDate);
-    return callTime >= threeHoursAgo &&
-           callTime <= now &&
-           !(call.Disposition || "").toLowerCase().includes("z-call not entered in cad");
+    const disposition = (call.Disposition || "").toLowerCase();
+    const problem = (call.Problem || "").toLowerCase();
+
+    // Skip calls outside 3-hour window or bad disposition
+    if (callTime < threeHoursAgo || callTime > now || disposition.includes("z-call not entered in cad")) {
+      return false;
+    }
+
+    // Delay Traffic Stops & Arrests by 30 minutes
+    if ((/traffic stop|traffic arrest/.test(problem)) && callTime > thirtyMinutesAgo) {
+      return false;
+    }
+
+    return true;
   })
   .sort((a, b) => new Date(b.ResponseDate) - new Date(a.ResponseDate))
   .forEach(call => {
@@ -130,11 +142,11 @@ calls
     });
 
     const marker = L.marker([call.Latitude, call.Longitude], { icon }).addTo(map);
-    marker.bindPopup(
+marker.bindPopup(
       `<div style="font-size: 16px;"><b>${new Date(call.ResponseDate).toLocaleString()}</b><br>${call.Problem}<br>${maskedAddress}<br>${call.Disposition}<br>${call.IncidentNumber}</div>`
     );
 
-    const row = document.createElement('tr');
+     const row = document.createElement('tr');
     row.innerHTML = `
        <td>${call.IncidentNumber}</td>
       <td>${new Date(call.ResponseDate).toLocaleString()}</td>
@@ -146,7 +158,12 @@ calls
     document.querySelector('#data-table tbody').appendChild(row);
   });
 
+
       });
   </script>
 </body>
 </html>
+
+
+
+
