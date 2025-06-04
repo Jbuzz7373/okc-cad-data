@@ -1,21 +1,33 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Live OKC CAD Calls</title>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OKC CAD Calls Map</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
-    body { font-family: Arial; padding: 20px; }
-    h1 { margin-bottom: 20px; }
-    table { border-collapse: collapse; width: 100%; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    th { background-color: #f2f2f2; }
-    tbody tr:hover { background-color: #f9f9f9; }
+    #map {
+      height: 600px;
+      width: 100%;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
   </style>
 </head>
 <body>
-
-  <h1>Live OKC CAD Calls</h1>
+  <h1>Oklahoma City CAD Calls (Live)</h1>
+  <div id="map"></div>
   <table>
     <thead>
       <tr>
@@ -25,40 +37,57 @@
         <th>Description</th>
         <th>Address</th>
         <th>Disposition</th>
-        <th>Cancel/Close Reason</th>
-        <th>Latitude</th>
-        <th>Longitude</th>
+        <th>Cancel Reason</th>
       </tr>
     </thead>
-    <tbody id="cad-body"></tbody>
+    <tbody id="call-table"></tbody>
   </table>
 
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
+    const map = L.map('map').setView([35.4676, -97.5164], 11);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
     fetch("https://raw.githubusercontent.com/Jbuzz7373/okc-cad-data/main/CadCalls.json")
-      .then(res => res.json())
+      .then(response => response.json())
       .then(data => {
-        const body = document.getElementById("cad-body");
-        data.forEach(item => {
+        const tableBody = document.getElementById("call-table");
+
+        data.forEach(call => {
+          // Add marker if lat/lng are present
+          if (call.Latitude && call.longitude) {
+            L.marker([call.Latitude, call.longitude])
+              .addTo(map)
+              .bindPopup(`
+                <strong>Incident:</strong> ${call.IncidentNumber}<br>
+                <strong>Time:</strong> ${new Date(call.ResponseDate).toLocaleString()}<br>
+                <strong>Problem:</strong> ${call.Problem}<br>
+                <strong>Description:</strong> ${call.Description}<br>
+                <strong>Address:</strong> ${call.Address}<br>
+                <strong>Disposition:</strong> ${call.Disposition}<br>
+                <strong>Cancel Reason:</strong> ${call.CancelCloseReason}
+              `);
+          }
+
+          // Add row to table
           const row = document.createElement("tr");
           row.innerHTML = `
-            <td>${item.IncidentNumber || ""}</td>
-            <td>${item.ResponseDate || ""}</td>
-            <td>${item.Problem || ""}</td>
-            <td>${item.Description || ""}</td>
-            <td>${item.Address || ""}</td>
-            <td>${item.Disposition || ""}</td>
-            <td>${item.CancelCloseReason || ""}</td>
-            <td>${item.Latitude || ""}</td>
-            <td>${item.longitude || ""}</td>
+            <td>${call.IncidentNumber}</td>
+            <td>${new Date(call.ResponseDate).toLocaleString()}</td>
+            <td>${call.Problem}</td>
+            <td>${call.Description}</td>
+            <td>${call.Address}</td>
+            <td>${call.Disposition}</td>
+            <td>${call.CancelCloseReason}</td>
           `;
-          body.appendChild(row);
+          tableBody.appendChild(row);
         });
       })
-      .catch(err => {
-        console.error("Failed to fetch CAD data:", err);
-        document.getElementById("cad-body").innerHTML = `<tr><td colspan="9">Error loading data</td></tr>`;
-      });
+      .catch(err => console.error("Failed to fetch CAD data:", err));
   </script>
-
 </body>
 </html>
