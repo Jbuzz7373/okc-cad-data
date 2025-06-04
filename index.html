@@ -68,7 +68,8 @@
       return address.replace(/\b(\d{5})(?=\s)/, (m) => m.slice(0, 3) + 'XX')
                     .replace(/\b(\d{4})(?=\s)/, (m) => m.slice(0, 2) + 'XX')
                     .replace(/\b(\d{3})(?=\s)/, (m) => m.slice(0, 1) + 'XX')
-                    .replace(/\b(\d{2})(?=\s)/, 'XX');
+                    .replace(/\b(\d{2})(?=\s)/, 'XX')
+                    .replace(/\b(\d{1})(?=\s)/, 'X');
     }
 
     function getIcon(problem) {
@@ -105,23 +106,26 @@
 
           const maskedAddress = maskAddress(call.Address || "");
 
-          const icon = L.divIcon({
-            className: 'custom-icon',
-            html: `<div style="font-size: 24px;">${getIcon(call.Problem || "")}</div>`
-          });
+         const icon = L.divIcon({
+  className: 'custom-icon',
+  html: `<div style="font-size: 24px;">${getIcon(call.Problem || "")}</div>`
+});
+
 
           const marker = L.marker([call.Latitude, call.Longitude], { icon }).addTo(map);
-          marker.bindPopup(
-            `<div style="font-size: 16px;"><b>${new Date(call.ResponseDate).toLocaleString()}</b><br>${call.Problem}<br>${maskedAddress}<br>${call.Disposition}</div>`
-          );
+         marker.bindPopup(
+  `<div style="font-size: 16px;"><b>${new Date(call.ResponseDate).toLocaleString()}</b><br>${call.Problem}<br>${maskedAddress}<br>${call.Disposition}</div>`
+);
+
 
           const row = document.createElement('tr');
-          row.innerHTML = `
-            <td>${new Date(call.ResponseDate).toLocaleString()}</td>
-            <td>${call.Problem}</td>
-            <td>${maskedAddress}</td>
-            <td>${call.Disposition}</td>
-          `;
+       row.innerHTML = `
+  <td>${new Date(call.ResponseDate).toLocaleString()}</td>
+  <td>${call.Problem}</td>
+  <td>${maskedAddress}</td>
+  <td>${call.Disposition}</td>
+`;
+
           row.onclick = () => map.setView([call.Latitude, call.Longitude], 15);
           tbody.appendChild(row);
         });
