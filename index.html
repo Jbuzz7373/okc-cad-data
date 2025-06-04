@@ -89,10 +89,30 @@
         return markerColors["default"];
       };
 
-      const maskAddressNumber = (address) => {
-        const match = address.match(/^(\d{3})\d{2}(.*)/);
-        return match ? `${match[1]}XX${match[2]}` : address;
-      };
+    function maskAddressNumber(address) {
+  const match = address.match(/^(\d+)(.*)/);
+  if (!match) return address;
+
+  const number = match[1];
+  const rest = match[2];
+
+  let masked;
+  if (number.length >= 5) {
+    masked = number.substring(0, 3) + 'XX';
+  } else if (number.length === 4) {
+    masked = number.substring(0, 2) + 'XX';
+  } else if (number.length === 3) {
+    masked = number.charAt(0) + 'XX';
+  } else if (number.length === 2) {
+    masked = 'XX';
+  } else if (number.length === 1) {
+    masked = 'X';
+  } else {
+    masked = '';
+  }
+
+  return masked + rest;
+};
 
       const markers = [];
 
