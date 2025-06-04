@@ -1,50 +1,39 @@
+
 <!DOCTYPE html>
 <html>
 <head>
+  <title>Oklahoma City CAD Calls</title>
   <meta charset="utf-8" />
-  <title>Oklahoma City Police CAD Calls</title>
+  <meta http-equiv="refresh" content="300">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
   <style>
-    #map { height: 600px; width: 100%; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { border: 1px solid #ccc; padding: 6px; font-size: 14px; text-align: left; }
-    th { background: #eee; }
-    tr:hover { background-color: #f0f0f0; cursor: pointer; }
-    #legend {
-      position: absolute; 
-      top: 10px; 
-      right: 10px; 
-      background: white; 
-      padding: 10px; 
-      border-radius: 5px; 
-      box-shadow: 0 0 5px rgba(0,0,0,0.3); 
-      font-size: 14px; 
-      line-height: 1.5; 
+    #map { height: 500px; }
+    .popup-content { font-size: 16px; line-height: 1.5em; }
+    .legend {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: white;
+      padding: 10px;
+      border-radius: 5px;
       z-index: 1000;
     }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ddd; padding: 8px; font-size: 14px; }
+    th { background-color: #f2f2f2; }
+    tr:hover { background-color: #f1f1f1; cursor: pointer; }
   </style>
 </head>
 <body>
   <h2>Oklahoma City CAD Calls</h2>
   <div id="map"></div>
-
-  <div id="legend">
-    <strong>Legend</strong><br>
-    <span style="color:red;">&#9679;</span> P1 - Danger Life or Property<br>
-    <span style="color:orange;">&#9679;</span> P2 May Need Life/Prop Protect<br>
-    <span style="color:yellow;">&#9679;</span> P3 Danger of Life/Prop NOT Inv<br>
-    <span style="color:green;">&#9679;</span> P4 Misdemeanor Crime<br>
-    <span style="color:blue;">&#9679;</span> P5 Time is not a Factor<br>
-    <span style="color:purple;">&#9679;</span> P6 Time is not a factor/Report<br>
-    <span style="color:gray;">&#9679;</span> Other
-  </div>
-
-  <table id="call-table">
+  <div class="legend" id="legend"></div>
+  <h3>Call Table</h3>
+  <table id="callTable">
     <thead>
       <tr>
-        <th>CAD Incident #</th>
+        <th>Incident #</th>
         <th>Response Date</th>
         <th>Problem</th>
         <th>Description</th>
@@ -55,116 +44,80 @@
     </thead>
     <tbody></tbody>
   </table>
-
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
   <script>
-    async function loadData() {
-      const response = await fetch("CadCalls.json?_=" + new Date().getTime());
-      const data = await response.json();
+    const iconMap = {
+      "ASSAULT": "https://cdn-icons-png.flaticon.com/128/11575/11575191.png",
+      "TRAFFIC": "https://cdn-icons-png.flaticon.com/128/1098/1098039.png",
+      "911": "https://cdn-icons-png.flaticon.com/128/5973/5973800.png",
+      "ACCIDENT": "https://cdn-icons-png.flaticon.com/128/865/865769.png",
+      "ALARM": "https://cdn-icons-png.flaticon.com/128/159/159105.png",
+      "BURGLARY": "https://cdn-icons-png.flaticon.com/128/789/789395.png",
+      "WHITE COLLAR": "https://cdn-icons-png.flaticon.com/128/3799/3799939.png",
+      "VANDALISM": "https://cdn-icons-png.flaticon.com/128/5549/5549611.png",
+      "DOMESTIC": "https://cdn-icons-png.flaticon.com/128/889/889442.png",
+      "DUI": "https://cdn-icons-png.flaticon.com/128/10870/10870331.png",
+      "TRESPASS": "https://cdn-icons-png.flaticon.com/128/11668/11668983.png",
+      "DISTURBANCE": "https://cdn-icons-png.flaticon.com/128/3596/3596061.png"
+    };
 
-      const map = L.map('map', {
-  minZoom: 10,
-  maxZoom: 14
-}).setView([35.4676, -97.5164], 11);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-      }).addTo(map);
+    const map = L.map('map').setView([35.4676, -97.5164], 11);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
 
-      const now = new Date();
-      const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000);
-      const tableBody = document.querySelector("#call-table tbody");
-      tableBody.innerHTML = "";
+    let markers = [];
 
-      const markerColors = {
-        "P1": "red",
-        "P2": "orange",
-        "P3": "yellow",
-        "P4": "green",
-        "P5": "blue",
-        "P6": "purple",
-        "default": "gray"
-      };
+    fetch('CadCalls.json')
+      .then(res => res.json())
+      .then(data => {
+        const tbody = document.querySelector("#callTable tbody");
+        tbody.innerHTML = "";
 
-      const getColor = (desc) => {
-        for (const key in markerColors) {
-          if (desc && desc.includes(key)) return markerColors[key];
-        }
-        return markerColors["default"];
-      };
+        const now = new Date();
+        const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000);
 
-    function maskAddressNumber(address) {
-  const match = address.match(/^(\d+)(.*)/);
-  if (!match) return address;
+        data.sort((a, b) => new Date(b.ResponseDate) - new Date(a.ResponseDate));
 
-  const number = match[1];
-  const rest = match[2];
-
-  let masked;
-  if (number.length >= 5) {
-    masked = number.substring(0, 3) + 'XX';
-  } else if (number.length === 4) {
-    masked = number.substring(0, 2) + 'XX';
-  } else if (number.length === 3) {
-    masked = number.charAt(0) + 'XX';
-  } else if (number.length === 2) {
-    masked = 'XX';
-  } else if (number.length === 1) {
-    masked = 'X';
-  } else {
-    masked = '';
-  }
-
-  return masked + rest;
-};
-
-      const markers = [];
-
-      const filtered = data
-        .filter(call => call.Disposition !== "z-CALL NOT ENTERED IN CAD")
-        .sort((a, b) => new Date(b.ResponseDate) - new Date(a.ResponseDate));
-
-      filtered.forEach((call, index) => {
-        const callDate = new Date(call.ResponseDate);
-        const maskedAddress = maskAddressNumber(call.Address || "");
-        let marker = null;
-
-        if (callDate > twoHoursAgo && call.Latitude && call.Longitude) {
-          const color = getColor(call.Description);
-          marker = L.circleMarker([call.Latitude, call.Longitude], {
-            radius: 8,
-            color: color,
-            fillColor: color,
-            fillOpacity: 0.8
-          }).addTo(map);
-          marker.bindPopup(
-            `<b>${new Date(call.ResponseDate).toLocaleString()}</b><br>${call.Problem}<br>${maskedAddress}<br>${call.Disposition}<br>${call.IncidentNumber}`
-          );
-        }
-
-        markers.push(marker);
-
-        const row = document.createElement("tr");
-        row.id = `row-${index}`;
-        row.innerHTML = `
-          <td>${call.IncidentNumber}</td>
-          <td>${new Date(call.ResponseDate).toLocaleString()}</td>
-          <td>${call.Problem || ""}</td>
-          <td>${call.Description || ""}</td>
-          <td>${maskedAddress}</td>
-          <td>${call.Disposition || ""}</td>
-          <td>${call.CallCompleteInfo || ""}</td>
-        `;
-        if (marker) {
-          row.addEventListener('click', () => {
-            map.setView(marker.getLatLng(), 16);
-            marker.openPopup();
+        data.forEach((call, index) => {
+          const row = document.createElement("tr");
+          ["IncidentNumber", "ResponseDate", "Problem", "Description", "Address", "Disposition", "CallCompleteInfo"].forEach(field => {
+            const td = document.createElement("td");
+            td.textContent = field === "ResponseDate" ? new Date(call[field]).toLocaleString() : call[field];
+            row.appendChild(td);
           });
-        }
-        tableBody.appendChild(row);
-      });
-    }
+          tbody.appendChild(row);
 
-    loadData();
-    setInterval(loadData, 300000); // Refresh every 5 minutes
+          if (
+            call.Latitude && call.Longitude &&
+            new Date(call.ResponseDate) >= twoHoursAgo &&
+            call.Disposition !== "z-CALL NOT ENTERED IN CAD"
+          ) {
+            let iconKey = Object.keys(iconMap).find(key => call.Problem.toUpperCase().includes(key)) || "TRAFFIC";
+            const markerIcon = L.icon({
+              iconUrl: iconMap[iconKey],
+              iconSize: [28, 28],
+              iconAnchor: [14, 28],
+              popupAnchor: [0, -28]
+            });
+
+            const marker = L.marker([call.Latitude, call.Longitude], { icon: markerIcon }).addTo(map)
+              .bindPopup(`<div class="popup-content"><b>${new Date(call.ResponseDate).toLocaleString()}</b><br>${call.Problem}<br>${call.Address}<br>${call.Disposition}</div>`);
+
+            markers.push(marker);
+            row.addEventListener('click', () => {
+              map.setView([call.Latitude, call.Longitude], 15);
+              marker.openPopup();
+            });
+          }
+        });
+
+        const legend = document.getElementById("legend");
+        legend.innerHTML = "<b>Legend</b><br>";
+        for (const [key, url] of Object.entries(iconMap)) {
+          legend.innerHTML += `<img src="${url}" width="20" style="vertical-align:middle"> ${key}<br>`;
+        }
+      });
   </script>
 </body>
 </html>
