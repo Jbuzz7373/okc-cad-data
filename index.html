@@ -55,14 +55,20 @@ fetch('https://raw.githubusercontent.com/Jbuzz7373/okc-cad-data/main/CadCalls.js
 
     const table = document.getElementById('call-table-body');
 
-    data.forEach(call => {
-      // Map marker
-      if (call.Latitude && call.longitude) {
-        L.marker([call.Latitude, call.longitude])
-          .addTo(map)
-          .bindPopup(`<strong>${call.Problem}</strong><br>${call.Address}<br>${new Date(call.ResponseDate).toLocaleString()}`);
+  const now = new Date();
+const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000); // 2 hours ago
 
-      }
+data.forEach(call => {
+  const callTime = new Date(call.ResponseDate);
+
+  // 🟢 Only add to the map if it's within the last 2 hours
+  if (callTime >= twoHoursAgo) {
+    const marker = L.marker([call.Latitude, call.longitude])
+      .bindPopup(`<strong>${call.Problem}</strong><br>${call.ResponseDate}`);
+    marker.addTo(map);
+  }
+});
+
 
       // Table row
       const row = document.createElement('tr');
