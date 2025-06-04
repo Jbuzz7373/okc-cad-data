@@ -2,114 +2,116 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="refresh" content="300" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>OKC CAD Calls</title>
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Oklahoma City CAD Calls</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <style>
-    #map { height: 500px; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    h2 {
+      text-align: center;
+      margin-top: 1rem;
+    }
+    #map {
+      height: 500px;
+      width: 100%;
+    }
     table {
       width: 100%;
       border-collapse: collapse;
+      margin-top: 1rem;
     }
     th, td {
-      padding: 8px;
+      border: 1px solid #ccc;
+      padding: 6px;
       text-align: left;
-      border: 1px solid #ddd;
     }
     th {
-      background-color: #f2f2f2;
+      background-color: #f5f5f5;
     }
   </style>
 </head>
 <body>
-  <h1>Oklahoma City CAD Calls</h1>
-  <div id="map"></div>
-  <h2>Call Table</h2>
-  <table id="cad-table">
-    <thead>
-      <tr>
-        <th>Incident #</th>
-        <th>Response Date</th>
-        <th>Problem</th>
-        <th>Description</th>
-        <th>Address</th>
-        <th>Disposition</th>
-        <th>Call Result</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script>
-    async function fetchData() {
-      const res = await fetch("https://raw.githubusercontent.com/Jbuzz7373/okc-cad-data/main/CadCalls.json?ts=2025-06-04T13:31:49.215639");
-      const data = await res.json();
-      return data;
-    }
+<h2>Oklahoma City CAD Calls</h2>
 
-    function isWithinLastTwoHours(dateStr) {
-      const callTime = new Date(dateStr);
+<div id="map"></div>
+
+<h3 style="margin-left: 10px;">Call Table</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Incident #</th>
+      <th>Response Date</th>
+      <th>Problem</th>
+      <th>Description</th>
+      <th>Address</th>
+      <th>Disposition</th>
+      <th>Call Result</th>
+    </tr>
+  </thead>
+  <tbody id="call-table-body">
+    <!-- Table rows injected here -->
+  </tbody>
+</table>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  const map = L.map('map').setView([35.4676, -97.5164], 11); // Oklahoma City center
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+
+  let markersLayer = L.layerGroup().addTo(map);
+
+  async function loadData() {
+    try {
+      const res = await fetch('CadCalls.json', { cache: 'no-cache' });
+      const calls = await res.json();
+
+      // Sort by ResponseDate descending
+      calls.sort((a, b) => new Date(b.ResponseDate) - new Date(a.ResponseDate));
+
       const now = new Date();
-      const diffMs = now - callTime;
-      return diffMs <= 2 * 60 * 60 * 1000;
-    }
+      const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000);
 
-    function populateTable(data) {
-      const tbody = document.querySelector("#cad-table tbody");
-      tbody.innerHTML = "";
+      // Clear old markers
+      markersLayer.clearLayers();
 
-      const sorted = [...data].sort((a, b) => new Date(b.ResponseDate) - new Date(a.ResponseDate));
-
-      for (const call of sorted) {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>{call.IncidentNumber}</td>
-          <td>{new Date(call.ResponseDate).toLocaleString()}</td>
-          <td>{call.Problem}</td>
-          <td>{call.Description}</td>
-          <td>{call.Address}</td>
-          <td>{call.Disposition}</td>
-          <td>{call.CallCompleteInfo}</td>
-        `;
-        tbody.appendChild(tr);
-      }
-    }
-
-    function populateMap(data) {
-      const map = L.map('map').setView([35.4676, -97.5164], 11);
-
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 18,
-        attribution: '© OpenStreetMap contributors'
-      }).addTo(map);
-
-      const recent = data.filter(d => isWithinLastTwoHours(d.ResponseDate));
-
-      for (const call of recent) {
-        if (call.Latitude && call.Longitude) {
-          const marker = L.marker([call.Latitude, call.Longitude]).addTo(map);
-          marker.bindPopup(`
-            <strong>Problem:</strong> {call.Problem}<br>
-            <strong>Description:</strong> {call.Description}<br>
-            <strong>Address:</strong> {call.Address}<br>
-            <strong>Disposition:</strong> {call.Disposition}<br>
-            <strong>Call Result:</strong> {call.CallCompleteInfo}<br>
-            <strong>Response:</strong> {new Date(call.ResponseDate).toLocaleString()}
-          `);
+      // Update map with last 2 hours
+      calls.forEach(call => {
+        const date = new Date(call.ResponseDate);
+        if (date >= twoHoursAgo && call.Latitude && call.Longitude) {
+          const marker = L.marker([call.Latitude, call.Longitude])
+            .bindPopup(`<strong>${call.Problem}</strong><br>${call.Address}`);
+          markersLayer.addLayer(marker);
         }
-      }
-    }
+      });
 
-    (async () => {
-      const data = await fetchData();
-      populateTable(data);
-      populateMap(data);
-    })();
-  </script>
+      // Update table with all rows
+      const tableBody = document.getElementById('call-table-body');
+      tableBody.innerHTML = calls.map(call => `
+        <tr>
+          <td>${call.IncidentNumber || ''}</td>
+          <td>${new Date(call.ResponseDate).toLocaleString()}</td>
+          <td>${call.Problem || ''}</td>
+          <td>${call.Description || ''}</td>
+          <td>${call.Address || ''}</td>
+          <td>${call.Disposition || ''}</td>
+          <td>${call.CallCompleteInfo || ''}</td>
+        </tr>
+      `).join('');
+    } catch (err) {
+      console.error('Failed to load JSON:', err);
+    }
+  }
+
+  loadData();
+  setInterval(loadData, 5 * 60 * 1000); // Refresh every 5 minutes
+</script>
+
 </body>
 </html>
