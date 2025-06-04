@@ -38,7 +38,7 @@
     const jsonUrl = "https://raw.githubusercontent.com/Jbuzz7373/okc-cad-data/main/CadCalls.json";
 
     function fetchAndRenderData() {
-      fetch(jsonUrl)
+     fetch(jsonUrl + '?t=' + new Date().getTime())
         .then(response => response.json())
         .then(data => {
           const now = new Date();
