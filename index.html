@@ -136,7 +136,7 @@
             fillOpacity: 0.8
           }).addTo(map);
           marker.bindPopup(
-            `<b>${new Date(call.ResponseDate).toLocaleString()}</b><br>${call.Problem}<br>${maskedAddress}<br>${call.Disposition}`
+            `<b>${new Date(call.ResponseDate).toLocaleString()}</b><br>${call.Problem}<br>${maskedAddress}<br>${call.Disposition}<br>${call.IncidentNumber}`
           );
         }
 
