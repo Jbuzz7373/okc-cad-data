@@ -1,28 +1,29 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="refresh" content="300" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Oklahoma City CAD Calls</title>
-  <meta charset="utf-8" />
-  <meta http-equiv="refresh" content="300">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
   <style>
-    #map { height: 500px; }
-    .popup-content { font-size: 16px; line-height: 1.5em; }
+    #map { height: 500px; width: 100%; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+    th, td { border: 1px solid #ddd; padding: 8px; font-size: 14px; }
+    th { background-color: #f2f2f2; text-align: left; }
+    tr:hover { background-color: #f1f1f1; cursor: pointer; }
     .legend {
       position: absolute;
       top: 10px;
       right: 10px;
       background: white;
       padding: 10px;
+      line-height: 1.5em;
+      font-size: 14px;
+      border: 1px solid #ccc;
       border-radius: 5px;
-      z-index: 1000;
     }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { border: 1px solid #ddd; padding: 8px; font-size: 14px; }
-    th { background-color: #f2f2f2; }
-    tr:hover { background-color: #f1f1f1; cursor: pointer; }
+    .legend img { vertical-align: middle; width: 20px; height: 20px; margin-right: 6px; }
   </style>
 </head>
 <body>
@@ -44,78 +45,84 @@
     </thead>
     <tbody></tbody>
   </table>
+
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
   <script>
     const iconMap = {
-      "ASSAULT": "https://cdn-icons-png.flaticon.com/128/11575/11575191.png",
-      "TRAFFIC": "https://cdn-icons-png.flaticon.com/128/1098/1098039.png",
-      "911": "https://cdn-icons-png.flaticon.com/128/5973/5973800.png",
-      "ACCIDENT": "https://cdn-icons-png.flaticon.com/128/865/865769.png",
-      "ALARM": "https://cdn-icons-png.flaticon.com/128/159/159105.png",
-      "BURGLARY": "https://cdn-icons-png.flaticon.com/128/789/789395.png",
-      "WHITE COLLAR": "https://cdn-icons-png.flaticon.com/128/3799/3799939.png",
-      "VANDALISM": "https://cdn-icons-png.flaticon.com/128/5549/5549611.png",
-      "DOMESTIC": "https://cdn-icons-png.flaticon.com/128/889/889442.png",
-      "DUI": "https://cdn-icons-png.flaticon.com/128/10870/10870331.png",
-      "TRESPASS": "https://cdn-icons-png.flaticon.com/128/11668/11668983.png",
-      "DISTURBANCE": "https://cdn-icons-png.flaticon.com/128/3596/3596061.png"
+      "911": "https://cdn-icons-png.flaticon.com/512/1034/1034131.png",
+      "ASSAULT": "https://cdn-icons-png.flaticon.com/512/1809/1809383.png",
+      "TRAFFIC": "https://cdn-icons-png.flaticon.com/512/743/743007.png",
+      "ACCIDENT": "https://cdn-icons-png.flaticon.com/512/942/942748.png",
+      "ALARM": "https://cdn-icons-png.flaticon.com/512/1046/1046776.png",
+      "BURGLARY": "https://cdn-icons-png.flaticon.com/512/809/809957.png",
+      "WHITE COLLAR": "https://cdn-icons-png.flaticon.com/512/1041/1041916.png",
+      "VANDALISM": "https://cdn-icons-png.flaticon.com/512/1041/1041974.png",
+      "DOMESTIC": "https://cdn-icons-png.flaticon.com/512/2857/2857380.png",
+      "DUI": "https://cdn-icons-png.flaticon.com/512/1034/1034351.png",
+      "TRESPASS": "https://cdn-icons-png.flaticon.com/512/2203/2203187.png",
+      "DISTURBANCE": "https://cdn-icons-png.flaticon.com/512/1683/1683539.png"
     };
 
-    const map = L.map('map').setView([35.4676, -97.5164], 11);
+  const map = L.map('map', {
+  minZoom: 10,
+  maxZoom: 15
+}).setView([35.4676, -97.5164], 11);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors'
+      attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    let markers = [];
-
     fetch('CadCalls.json')
-      .then(res => res.json())
+      .then(response => response.json())
       .then(data => {
-        const tbody = document.querySelector("#callTable tbody");
-        tbody.innerHTML = "";
-
         const now = new Date();
-        const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000);
+        const markers = [];
 
         data.sort((a, b) => new Date(b.ResponseDate) - new Date(a.ResponseDate));
 
-        data.forEach((call, index) => {
-          const row = document.createElement("tr");
-          ["IncidentNumber", "ResponseDate", "Problem", "Description", "Address", "Disposition", "CallCompleteInfo"].forEach(field => {
-            const td = document.createElement("td");
-            td.textContent = field === "ResponseDate" ? new Date(call[field]).toLocaleString() : call[field];
-            row.appendChild(td);
+        const tbody = document.querySelector("#callTable tbody");
+        data.forEach((call, i) => {
+          const callDate = new Date(call.ResponseDate);
+          const ageInMs = now - callDate;
+          const ageInHours = ageInMs / 3600000;
+
+          const exclude = call.Disposition && call.Disposition.includes("z-CALL NOT ENTERED IN CAD");
+          if (!exclude && ageInHours <= 2) {
+            const iconKey = Object.keys(iconMap).find(key => call.Problem?.toUpperCase().includes(key));
+            const iconUrl = iconMap[iconKey] || "https://cdn-icons-png.flaticon.com/512/252/252025.png";
+
+            const icon = L.icon({ iconUrl, iconSize: [25, 25] });
+            const marker = L.marker([call.Latitude, call.Longitude], { icon }).addTo(map);
+            marker.bindPopup(
+              `<b>${new Date(call.ResponseDate).toLocaleString()}</b><br>${call.Problem}<br>${call.Address}<br>${call.Disposition}`
+            );
+            markers.push(marker);
+            call._marker = marker;
+          }
+
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${call.IncidentNumber}</td>
+            <td>${new Date(call.ResponseDate).toLocaleString()}</td>
+            <td>${call.Problem}</td>
+            <td>${call.Description}</td>
+            <td>${call.Address}</td>
+            <td>${call.Disposition}</td>
+            <td>${call.CallCompleteInfo}</td>
+          `;
+          row.addEventListener('click', () => {
+            if (call._marker) {
+              map.setView(call._marker.getLatLng(), 15);
+              call._marker.openPopup();
+            }
           });
           tbody.appendChild(row);
-
-          if (
-            call.Latitude && call.Longitude &&
-            new Date(call.ResponseDate) >= twoHoursAgo &&
-            call.Disposition !== "z-CALL NOT ENTERED IN CAD"
-          ) {
-            let iconKey = Object.keys(iconMap).find(key => call.Problem.toUpperCase().includes(key)) || "TRAFFIC";
-            const markerIcon = L.icon({
-              iconUrl: iconMap[iconKey],
-              iconSize: [28, 28],
-              iconAnchor: [14, 28],
-              popupAnchor: [0, -28]
-            });
-
-            const marker = L.marker([call.Latitude, call.Longitude], { icon: markerIcon }).addTo(map)
-              .bindPopup(`<div class="popup-content"><b>${new Date(call.ResponseDate).toLocaleString()}</b><br>${call.Problem}<br>${call.Address}<br>${call.Disposition}</div>`);
-
-            markers.push(marker);
-            row.addEventListener('click', () => {
-              map.setView([call.Latitude, call.Longitude], 15);
-              marker.openPopup();
-            });
-          }
         });
 
-        const legend = document.getElementById("legend");
-        legend.innerHTML = "<b>Legend</b><br>";
+        // Legend
+        const legendDiv = document.getElementById("legend");
+        legendDiv.innerHTML = "<b>Legend</b><br>";
         for (const [key, url] of Object.entries(iconMap)) {
-          legend.innerHTML += `<img src="${url}" width="20" style="vertical-align:middle"> ${key}<br>`;
+          legendDiv.innerHTML += `<img src="${url}" alt="${key}"/> ${key}<br>`;
         }
       });
   </script>
