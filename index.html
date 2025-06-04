@@ -82,6 +82,7 @@ function maskAddress(address) {
 
 
     function getIcon(problem) {
+      if (/A.D.W./i.test(problem)) return "🤜";
       if (/assault/i.test(problem)) return "🤜";
       if (/traffic stop/i.test(problem)) return "🚓";
       if (/911/i.test(problem)) return "📞";
@@ -135,7 +136,7 @@ calls
 
     const row = document.createElement('tr');
     row.innerHTML = `
-       <td>${call.incidentnumber}</td>
+       <td>${call.Incidentnumber}</td>
       <td>${new Date(call.ResponseDate).toLocaleString()}</td>
       <td>${call.Problem}</td>
       <td>${maskedAddress}</td>
