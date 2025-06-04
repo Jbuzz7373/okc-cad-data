@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -18,6 +17,18 @@
 <body>
   <h2>Oklahoma City CAD Calls</h2>
   <div id="map"></div>
+
+  <div id="legend" style="position: absolute; top: 10px; right: 10px; background: white; padding: 10px; border-radius: 5px; box-shadow: 0 0 5px rgba(0,0,0,0.3); font-size: 14px; line-height: 1.5; z-index: 1000;">
+    <strong>Legend</strong><br>
+    <span style="color:red;">&#9679;</span> P1 - Danger Life or Property<br>
+    <span style="color:orange;">&#9679;</span> P2<br>
+    <span style="color:yellow;">&#9679;</span> P3<br>
+    <span style="color:green;">&#9679;</span> P4<br>
+    <span style="color:blue;">&#9679;</span> P5<br>
+    <span style="color:purple;">&#9679;</span> P6<br>
+    <span style="color:gray;">&#9679;</span> Other
+  </div>
+
   <h3>Call Table</h3>
   <table id="call-table">
     <thead>
@@ -115,14 +126,13 @@
     setInterval(loadData, 300000); // Refresh every 5 minutes
   </script>
 
-  <div id="legend" style="position: absolute; top: 15px; right: 15px; background: white; padding: 15px; border-radius: 5px; box-shadow: 0 0 5px rgba(0,0,0,0.3); font-size: 14px; line-height: 1.5;">
-    <strong>Legend</strong><br>
+  <div id="legend" style="position: absolute; top: 10px; right: 10px; background: white; padding: 10px; border-radius: 5px; box-shadow: 0 0 5px rgba(0,0,0,0.3); font-size: 14px; line-height: 1.5;">
     <span style="color:red;">&#9679;</span> P1 - Danger Life or Property<br>
-    <span style="color:orange;">&#9679;</span> P2<br>
-    <span style="color:yellow;">&#9679;</span> P3<br>
-    <span style="color:green;">&#9679;</span> P4<br>
-    <span style="color:blue;">&#9679;</span> P5<br>
-    <span style="color:purple;">&#9679;</span> P6<br>
+    <span style="color:orange;">&#9679;</span> P2 May Need Life/Prop Protect<br>
+    <span style="color:yellow;">&#9679;</span> P3 Danger of Life/Prop NOT Inv<br>
+    <span style="color:green;">&#9679;</span> P4 Misdemeanor Crime<br>
+    <span style="color:blue;">&#9679;</span> P5 Time is not a Factor<br>
+    <span style="color:purple;">&#9679;</span> P6 Time is not a factor/Report6<br>
     <span style="color:gray;">&#9679;</span> Other
   </div>
 </body>
