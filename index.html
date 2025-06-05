@@ -40,12 +40,14 @@
   <div id="legend">
   <strong>Legend</strong><br>
   <img src="img/marker-icon-blue.png"   style="height: 20px; vertical-align: middle;"> Assault / Domestic / Accident<br>
-  <img src="img/marker-icon-blue.png"  style="height: 20px; vertical-align: middle;"> Traffic / Check Welfare<br>
+  <img src="img/Red.png"  style="height: 20px; vertical-align: middle;"> Traffic<br>
+     <img src="img/Black.png"  style="height: 20px; vertical-align: middle;"> Check Welfare<br>
   <img src="img/marker-icon-orange.png" style="height: 20px; vertical-align: middle;"> 911 / Disturbance<br>
   <img src="img/marker-icon-yellow.png" style="height: 20px; vertical-align: middle;"> Alarm<br>
   <img src="img/marker-icon-green.png" style="height: 20px; vertical-align: middle;"> Vandalism / Citizen Assist<br>
   <img src="img/marker-icon-violet.png" style="height: 20px; vertical-align: middle;"> DUI / Burglary<br>
   <img src="img/marker-icon-grey.png"  style="height: 20px; vertical-align: middle;"> White Collar / Other
+    <img src="img/Green.png"  style="height: 20px; vertical-align: middle;"> All Other
 </div>
 
   <table id="data-table">
@@ -77,7 +79,7 @@
     }
 
 function getMarkerIcon(problem) {
-  if (/A.D.W.|assault/i.test(problem)) return 'marker-icon-red';
+  if (/A.D.W.|assault/i.test(problem)) return 'Pink';
   if (/traffic stop|traffic arrest/i.test(problem)) return 'marker-icon-blue';
   if (/911/i.test(problem)) return 'marker-icon-orange';
   if (/alarm/i.test(problem)) return 'marker-icon-yellow';
@@ -88,9 +90,9 @@ function getMarkerIcon(problem) {
   if (/drunk|dui/i.test(problem)) return 'marker-icon-violet';
   if (/trespass/i.test(problem)) return 'marker-icon-blue';
   if (/disturb/i.test(problem)) return 'marker-icon-orange';
-  if (/check the welfare/i.test(problem)) return 'marker-icon-blue';
+  if (/check the welfare/i.test(problem)) return 'Black';
   if (/citizen assist/i.test(problem)) return 'marker-icon-green';
-  if (/accident/i.test(problem)) return 'marker-icon-red';
+  if (/accident/i.test(problem)) return 'Green';
   return 'marker-icon-grey';
 }
 
