@@ -37,21 +37,21 @@
 </head>
 <body>
   <div id="map"></div>
-  <div id="legend">
-    <strong>Legend</strong><br>
-    🚓 Traffic Stop<br>
-    📞 911 Call<br>
-    🚨 Alarm<br>
-    🎭 Burglary<br>
-    🧥 White Collar<br>
-    🪟 Vandalism<br>
-    🎗 Domestic<br>
-    <img src="img/dui.png" alt="DUI" style="width:16px;height:16px;vertical-align:middle;"> DUI<br>
-    🚫 Trespass<br>
-    📣 Disturbance<br>
-    🤜 Assault
-    📍 All Other 
-  </div>
+ <div id="legend">
+  <strong>Legend</strong><br>
+  🚓 Traffic Stop<br>
+  📞 911 Call<br>
+  🚨 Alarm<br>
+  🎭 Burglary<br>
+  🧥 White Collar<br>
+  🪟 Vandalism<br>
+  🎗 Domestic<br>
+  <br><img src="img/DUI.png" alt="DUI" style="width:16px;height:16px;vertical-align:middle; margin-right:4px;"> DUI<br>
+  🚫 Trespass<br>
+  📣 Disturbance<br>
+  🤜 Assault<br>
+  <br>📍 All Other (Red Pin)
+</div>
   <table id="data-table">
     <thead>
       <tr>
@@ -92,7 +92,7 @@ function maskAddress(address) {
       if (/white collar/i.test(problem)) return "🧥";
       if (/vandalism/i.test(problem)) return "🪟";
       if (/domestic/i.test(problem)) return "🎗";
-      if (/drunk|dui/i.test(problem)) return "<img src='img/dui.png' alt='DUI' style='width:24px;height:24px;'>";
+      if (/drunk|dui/i.test(problem)) return "<img src='img/DUI.png' alt='DUI' style='width:24px;height:24px;'>";
       if (/trespass/i.test(problem)) return "🚫";
       if (/disturb/i.test(problem)) return "📣";
       return "📍";
