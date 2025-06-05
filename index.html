@@ -38,23 +38,15 @@
   <div id="map"></div>
 
   <div id="legend">
-    <strong>Legend</strong><br>
-    🚓 Traffic Stop<br>
-    📞 911 Call<br>
-    🚨 Alarm<br>
-    🎭 Burglary<br>
-    🧥 White Collar<br>
-    🪟 Vandalism<br>
-    🎗 Domestic<br>
-    <img src="img/DUI.png" alt="DUI" style="width:16px;height:16px;vertical-align:middle;"> DUI<br>
-    🚫 Trespass<br>
-    📣 Disturbance<br>
-    🤜 Assault<br>
-    🛑 Accident<br>
-    👁️ Check Welfare<br>
-    🙋 Citizen Assist<br>
-    📍 All Other
-  </div>
+  <strong>Legend</strong><br>
+  <img src="img/red.png"   style="height: 20px; vertical-align: middle;"> Assault / Domestic / Accident<br>
+  <img src="img/blue.png"  style="height: 20px; vertical-align: middle;"> Traffic / Check Welfare<br>
+  <img src="img/orange.png" style="height: 20px; vertical-align: middle;"> 911 / Disturbance<br>
+  <img src="img/yellow.png" style="height: 20px; vertical-align: middle;"> Alarm<br>
+  <img src="img/green.png" style="height: 20px; vertical-align: middle;"> Vandalism / Citizen Assist<br>
+  <img src="img/purple.png" style="height: 20px; vertical-align: middle;"> DUI / Burglary<br>
+  <img src="img/grey.png"  style="height: 20px; vertical-align: middle;"> White Collar / Other
+</div>
 
   <table id="data-table">
     <thead>
@@ -84,23 +76,35 @@
         .replace(/\b(\d{1})(?=\s)/g, 'X');
     }
 
-    function getIcon(problem) {
-      if (/A\.D\.W\.|assault/i.test(problem)) return "🤜";
-      if (/traffic stop|traffic arrest/i.test(problem)) return "🚓";
-      if (/911/i.test(problem)) return "📞";
-      if (/alarm/i.test(problem)) return "🚨";
-      if (/burglary/i.test(problem)) return "🎭";
-      if (/white collar/i.test(problem)) return "🧥";
-      if (/vandalism/i.test(problem)) return "🪟";
-      if (/domestic/i.test(problem)) return "🎗";
-      if (/drunk|dui/i.test(problem)) return "<img src='img/DUI.png' alt='DUI' style='width:24px;height:24px;'>";
-      if (/trespass/i.test(problem)) return "🚫";
-      if (/disturb/i.test(problem)) return "📣";
-      if (/accident/i.test(problem)) return "🛑";
-      if (/check.*welfare/i.test(problem)) return "👁️";
-      if (/citizen.*assist/i.test(problem)) return "🙋";
-      return "📍";
-    }
+function getMarkerIcon(problem) {
+  if (/A.D.W.|assault/i.test(problem)) return 'red';
+  if (/traffic stop|traffic arrest/i.test(problem)) return 'blue';
+  if (/911/i.test(problem)) return 'orange';
+  if (/alarm/i.test(problem)) return 'yellow';
+  if (/burglary/i.test(problem)) return 'purple';
+  if (/white collar/i.test(problem)) return 'grey';
+  if (/vandalism/i.test(problem)) return 'green';
+  if (/domestic/i.test(problem)) return 'red';
+  if (/drunk|dui/i.test(problem)) return 'purple';
+  if (/trespass/i.test(problem)) return 'blue';
+  if (/disturb/i.test(problem)) return 'orange';
+  if (/check the welfare/i.test(problem)) return 'blue';
+  if (/citizen assist/i.test(problem)) return 'green';
+  if (/accident/i.test(problem)) return 'red';
+  return 'grey';
+}
+
+function createIcon(color) {
+  return L.icon({
+    iconUrl: `img/${color}.png`,
+    shadowUrl: 'img/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+  });
+}
+
 
     const map = L.map('map', {
       minZoom: 10,
@@ -119,57 +123,57 @@
     const threeHoursAgo = new Date(now.getTime() - 3 * 60 * 60 * 1000);
     const thirtyMinutesAgo = new Date(now.getTime() - 30 * 60 * 1000);
 
-    calls
-      .sort((a, b) => new Date(b.ResponseDate) - new Date(a.ResponseDate))
-      .forEach(call => {
-        const callTime = new Date(call.ResponseDate);
-        const disposition = (call.Disposition || "").toLowerCase();
-        const problem = (call.Problem || "").toLowerCase();
-        const maskedAddress = maskAddress(call.Address || "");
+calls
+  .sort((a, b) => new Date(b.ResponseDate) - new Date(a.ResponseDate))
+  .forEach(call => {
+    const callTime = new Date(call.ResponseDate);
+    const disposition = (call.Disposition || "").toLowerCase();
+    const problem = (call.Problem || "").toLowerCase();
+    const maskedAddress = maskAddress(call.Address || "");
 
-        // Table: show ALL records except z-call
-        if (!disposition.includes("z-call not entered in cad")) {
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td>${call.IncidentNumber}</td>
-            <td>${new Date(call.ResponseDate).toLocaleString()}</td>
-            <td>${call.Problem}</td>
-            <td>${maskedAddress}</td>
-            <td>${call.Disposition}</td>
-          `;
-          tbody.appendChild(row);
-        }
+    // Always create row (if not z-call)
+    let row = null;
+    if (!disposition.includes("z-call not entered in cad")) {
+      row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${call.IncidentNumber}</td>
+        <td>${new Date(call.ResponseDate).toLocaleString()}</td>
+        <td>${call.Problem}</td>
+        <td>${maskedAddress}</td>
+        <td>${call.Disposition}</td>
+      `;
+      document.querySelector('#data-table tbody').appendChild(row);
+    }
 
-        // Map: show recent (3hr) calls only, filter same way as before
-        if (
-          callTime >= threeHoursAgo &&
-          callTime <= now &&
-          !disposition.includes("z-call not entered in cad") &&
-          !( /traffic stop|traffic arrest/.test(problem) && callTime > thirtyMinutesAgo )
-        ) {
-          const iconContent = getIcon(call.Problem || "");
-          const icon = L.divIcon({
-            className: 'custom-icon',
-            html: `<div style="font-size: 22px;">${iconContent}</div>`
-          });
+    // Conditionally create marker
+    if (
+      callTime >= threeHoursAgo &&
+      callTime <= now &&
+      !disposition.includes("z-call not entered in cad") &&
+      !( /traffic stop|traffic arrest/.test(problem) && callTime > thirtyMinutesAgo )
+    ) {
+      const color = getMarkerIcon(call.Problem || "");
+      const marker = L.marker([call.Latitude, call.Longitude], {
+        icon: createIcon(color)
+      }).addTo(map);
 
-          const marker = L.marker([call.Latitude, call.Longitude], { icon }).addTo(map);
-          marker.bindPopup(`
-            <div style="font-size: 16px;">
-              <b>${new Date(call.ResponseDate).toLocaleString()}</b><br>
-              ${call.Problem}<br>
-              ${maskedAddress}<br>
-              ${call.Disposition}<br>
-              ${call.IncidentNumber}
-            </div>
-          `);
+      marker.bindPopup(`
+        <div style="font-size: 16px;">
+          <b>${new Date(call.ResponseDate).toLocaleString()}</b><br>
+          ${call.Problem}<br>
+          ${maskedAddress}<br>
+          ${call.Disposition}<br>
+          ${call.IncidentNumber}
+        </div>
+      `);
 
-          row.onclick = () => {
-            map.setView([call.Latitude, call.Longitude], 15);
-            marker.openPopup();
-          };
-        }
-      });
+      if (row) {
+        row.onclick = () => {
+          map.setView([call.Latitude, call.Longitude], 15);
+          marker.openPopup();
+        };
+      }
+    }
   });
 
   </script>
