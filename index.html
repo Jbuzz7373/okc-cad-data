@@ -46,7 +46,7 @@
     🧥 White Collar<br>
     🪟 Vandalism<br>
     🎗 Domestic<br>
-    🚘🍷 DUI<br>
+    <img src="img/dui.png" alt="DUI" style="width:16px;height:16px;vertical-align:middle;"> DUI<br>
     🚫 Trespass<br>
     📣 Disturbance<br>
     🤜 Assault
@@ -91,7 +91,7 @@ function maskAddress(address) {
       if (/white collar/i.test(problem)) return "🧥";
       if (/vandalism/i.test(problem)) return "🪟";
       if (/domestic/i.test(problem)) return "🎗";
-      if (/drunk|dui/i.test(problem)) return "🚘🍷";
+      if (/drunk|dui/i.test(problem)) return "<img src='img/dui.png' alt='DUI' style='width:24px;height:24px;'>";
       if (/trespass/i.test(problem)) return "🚫";
       if (/disturb/i.test(problem)) return "📣";
       return "📍";
@@ -110,56 +110,69 @@ function maskAddress(address) {
 
       .then(response => response.json())
       .then(calls => {
-        const tbody = document.querySelector('#data-table tbody');
-const now = new Date();
-const threeHoursAgo = new Date(now.getTime() - 3 * 60 * 60 * 1000);
-const thirtyMinutesAgo = new Date(now.getTime() - 30 * 60 * 1000);
+  const tbody = document.querySelector('#data-table tbody');
+  const now = new Date();
+  const threeHoursAgo = new Date(now.getTime() - 3 * 60 * 60 * 1000);
+  const thirtyMinutesAgo = new Date(now.getTime() - 30 * 60 * 1000);
 
-calls
-  .filter(call => {
-    const callTime = new Date(call.ResponseDate);
-    const disposition = (call.Disposition || "").toLowerCase();
-    const problem = (call.Problem || "").toLowerCase();
+  const markerMap = new Map(); // Store markers by incident number
 
-    // Skip calls outside 3-hour window or bad disposition
-    if (callTime < threeHoursAgo || callTime > now || disposition.includes("z-call not entered in cad")) {
-      return false;
-    }
+  calls
+    .filter(call => {
+      const callTime = new Date(call.ResponseDate);
+      const disposition = (call.Disposition || "").toLowerCase();
+      const problem = (call.Problem || "").toLowerCase();
 
-    // Delay Traffic Stops & Arrests by 30 minutes
-    if ((/traffic stop|traffic arrest/.test(problem)) && callTime > thirtyMinutesAgo) {
-      return false;
-    }
+      if (callTime < threeHoursAgo || callTime > now || disposition.includes("z-call not entered in cad")) {
+        return false;
+      }
 
-    return true;
-  })
-  .sort((a, b) => new Date(b.ResponseDate) - new Date(a.ResponseDate))
-  .forEach(call => {
-    const maskedAddress = maskAddress(call.Address || "");
-    const icon = L.divIcon({
-      className: 'custom-icon',
-      html: `<div style="font-size: 24px;">${getIcon(call.Problem || "")}</div>`
-    });
+      if ((/traffic stop|traffic arrest/.test(problem)) && callTime > thirtyMinutesAgo) {
+        return false;
+      }
 
-    const marker = L.marker([call.Latitude, call.Longitude], { icon }).addTo(map);
-marker.bindPopup(
-      `<div style="font-size: 16px;"><b>${new Date(call.ResponseDate).toLocaleString()}</b><br>${call.Problem}<br>${maskedAddress}<br>${call.Disposition}<br>${call.IncidentNumber}</div>`
-    );
-
-     const row = document.createElement('tr');
-    row.innerHTML = `
-       <td>${call.IncidentNumber}</td>
-      <td>${new Date(call.ResponseDate).toLocaleString()}</td>
-      <td>${call.Problem}</td>
-      <td>${maskedAddress}</td>
-      <td>${call.Disposition}</td>
-    `;
-    row.onclick = () => map.setView([call.Latitude, call.Longitude], 15);
-    document.querySelector('#data-table tbody').appendChild(row);
-  });
-
-
+      return true;
+    })
+    .sort((a, b) => new Date(b.ResponseDate) - new Date(a.ResponseDate))
+    .forEach(call => {
+      const maskedAddress = maskAddress(call.Address || "");
+      const icon = L.divIcon({
+        className: 'custom-icon',
+        html: `<div style="font-size: 24px;">${getIcon(call.Problem || "")}</div>`
       });
+
+      const marker = L.marker([call.Latitude, call.Longitude], { icon }).addTo(map);
+      const popupContent = `
+        <div style="font-size: 16px;">
+          <b>${new Date(call.ResponseDate).toLocaleString()}</b><br>
+          ${call.Problem}<br>
+          ${maskedAddress}<br>
+          ${call.Disposition}<br>
+          ${call.IncidentNumber}
+        </div>
+      `;
+      marker.bindPopup(popupContent);
+
+      markerMap.set(call.IncidentNumber, marker); // Store for later reference
+
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${call.IncidentNumber}</td>
+        <td>${new Date(call.ResponseDate).toLocaleString()}</td>
+        <td>${call.Problem}</td>
+        <td>${maskedAddress}</td>
+        <td>${call.Disposition}</td>
+      `;
+
+      row.onclick = () => {
+        map.setView([call.Latitude, call.Longitude], 15);
+        marker.openPopup(); // Show popup
+      };
+
+      tbody.appendChild(row);
+    });
+});
+
   </script>
 </body>
 </html>
