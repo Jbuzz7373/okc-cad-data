@@ -77,26 +77,27 @@
     }
 
 function getMarkerIcon(problem) {
-  if (/A.D.W.|assault/i.test(problem)) return 'red';
-  if (/traffic stop|traffic arrest/i.test(problem)) return 'blue';
-  if (/911/i.test(problem)) return 'orange';
-  if (/alarm/i.test(problem)) return 'yellow';
-  if (/burglary/i.test(problem)) return 'purple';
-  if (/white collar/i.test(problem)) return 'grey';
-  if (/vandalism/i.test(problem)) return 'green';
-  if (/domestic/i.test(problem)) return 'red';
-  if (/drunk|dui/i.test(problem)) return 'purple';
-  if (/trespass/i.test(problem)) return 'blue';
-  if (/disturb/i.test(problem)) return 'orange';
-  if (/check the welfare/i.test(problem)) return 'blue';
-  if (/citizen assist/i.test(problem)) return 'green';
-  if (/accident/i.test(problem)) return 'red';
-  return 'grey';
+  if (/A.D.W.|assault/i.test(problem)) return 'marker-icon-red';
+  if (/traffic stop|traffic arrest/i.test(problem)) return 'marker-icon-blue';
+  if (/911/i.test(problem)) return 'marker-icon-orange';
+  if (/alarm/i.test(problem)) return 'marker-icon-yellow';
+  if (/burglary/i.test(problem)) return 'marker-icon-violet';
+  if (/white collar/i.test(problem)) return 'marker-icon-grey';
+  if (/vandalism/i.test(problem)) return 'marker-icon-green';
+  if (/domestic/i.test(problem)) return 'marker-icon-red';
+  if (/drunk|dui/i.test(problem)) return 'marker-icon-violet';
+  if (/trespass/i.test(problem)) return 'marker-icon-blue';
+  if (/disturb/i.test(problem)) return 'marker-icon-orange';
+  if (/check the welfare/i.test(problem)) return 'marker-icon-blue';
+  if (/citizen assist/i.test(problem)) return 'marker-icon-green';
+  if (/accident/i.test(problem)) return 'marker-icon-red';
+  return 'marker-icon-grey';
 }
 
-function createIcon(color) {
+
+function createIcon(name) {
   return L.icon({
-    iconUrl: `img/${color}.png`,
+    iconUrl: `img/${name}.png`,
     shadowUrl: 'img/marker-shadow.png',
     iconSize: [25, 41],
     iconAnchor: [12, 41],
