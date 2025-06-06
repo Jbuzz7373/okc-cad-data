@@ -39,15 +39,20 @@
 
   <div id="legend">
   <strong>Legend</strong><br>
-  <img src="img/marker-icon-blue.png"   style="height: 20px; vertical-align: middle;"> Assault / Domestic / Accident<br>
+  <img src="img/Pink.png"   style="height: 20px; vertical-align: middle;"> Assault<br>
+    <img src="img/LBlue.png"   style="height: 20px; vertical-align: middle;"> Domestic<br>
+     <img src="img/Blue.png"   style="height: 20px; vertical-align: middle;"> Accident<br>
   <img src="img/Red.png"  style="height: 20px; vertical-align: middle;"> Traffic<br>
-     <img src="img/Black.png"  style="height: 20px; vertical-align: middle;"> Check Welfare<br>
-  <img src="img/marker-icon-orange.png" style="height: 20px; vertical-align: middle;"> 911 / Disturbance<br>
-  <img src="img/marker-icon-yellow.png" style="height: 20px; vertical-align: middle;"> Alarm<br>
-  <img src="img/marker-icon-green.png" style="height: 20px; vertical-align: middle;"> Vandalism / Citizen Assist<br>
-  <img src="img/marker-icon-violet.png" style="height: 20px; vertical-align: middle;"> DUI / Burglary<br>
-  <img src="img/marker-icon-grey.png"  style="height: 20px; vertical-align: middle;"> White Collar / Other
-    <img src="img/Green.png"  style="height: 20px; vertical-align: middle;"> All Other
+  <img src="img/Black.png"  style="height: 20px; vertical-align: middle;"> Check Welfare<br>
+  <img src="img/Magenta.png" style="height: 20px; vertical-align: middle;"> 911<br>
+      <img src="img/Orange.png" style="height: 20px; vertical-align: middle;"> Disturbance<br>
+  <img src="img/DGreen.png" style="height: 20px; vertical-align: middle;"> Alarm<br>
+  <img src="img/Aqua.png" style="height: 20px; vertical-align: middle;"> Vandalism<br>
+  <img src="img/Brown.png" style="height: 20px; vertical-align: middle;"> Citizen Assist<br>  
+  <img src="img/Green.png" style="height: 20px; vertical-align: middle;"> DUI<br>
+  <img src="img/Yellow.png" style="height: 20px; vertical-align: middle;"> Burglary<br>  
+  <img src="img/Purple.png"  style="height: 20px; vertical-align: middle;"> White Collar<br>
+    <img src="img/Grey.png"  style="height: 20px; vertical-align: middle;"> All Other
 </div>
 
   <table id="data-table">
@@ -79,22 +84,22 @@
     }
 
 function getMarkerIcon(problem) {
-  if (/A.D.W.|assault/i.test(problem)) return 'Pink';
-  if (/traffic stop|traffic arrest/i.test(problem)) return 'marker-icon-blue';
-  if (/911/i.test(problem)) return 'marker-icon-orange';
-  if (/alarm/i.test(problem)) return 'marker-icon-yellow';
-  if (/burglary/i.test(problem)) return 'marker-icon-violet';
-  if (/white collar/i.test(problem)) return 'marker-icon-grey';
-  if (/vandalism/i.test(problem)) return 'marker-icon-green';
-  if (/domestic/i.test(problem)) return 'marker-icon-red';
-  if (/drunk|dui/i.test(problem)) return 'marker-icon-violet';
-  if (/trespass/i.test(problem)) return 'marker-icon-blue';
-  if (/disturb/i.test(problem)) return 'marker-icon-orange';
+  if (/A\.D\.W\.|assault/i.test(problem)) return 'Pink';
+  if (/domestic/i.test(problem)) return 'LBlue';
+  if (/accident/i.test(problem)) return 'Blue';
+  if (/traffic stop|traffic arrest/i.test(problem)) return 'Red';
   if (/check the welfare/i.test(problem)) return 'Black';
-  if (/citizen assist/i.test(problem)) return 'marker-icon-green';
-  if (/accident/i.test(problem)) return 'Green';
-  return 'marker-icon-grey';
+  if (/911/i.test(problem)) return 'Magenta';
+  if (/disturb/i.test(problem)) return 'Orange';
+  if (/alarm/i.test(problem)) return 'DGreen';
+  if (/vandalism/i.test(problem)) return 'Aqua';
+  if (/citizen assist/i.test(problem)) return 'Brown';
+  if (/dui|drunk/i.test(problem)) return 'Green';
+  if (/burglary/i.test(problem)) return 'Yellow';
+  if (/white collar/i.test(problem)) return 'Purple';
+  return 'Grey'; // Default for anything not matched
 }
+
 
 
 function createIcon(name) {
