@@ -7,37 +7,69 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
-    body { margin: 0; font-family: Arial, sans-serif; }
-    #map { height: 600px; position: relative; z-index: 1; }
-    #legend {
-      position: absolute;
-      top: 10px;
-      right: 10px; 
-      z-index: 1001;
-      background: white;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      font-size: 14px;
-      line-height: 1.6;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-    }
-    th, td {
-      padding: 8px;
-      text-align: left;
-      border-bottom: 1px solid #ddd;
-    }
-    th { background-color: #f2f2f2; }
-  </style>
+  body { margin: 0; font-family: Arial, sans-serif; }
+  #map { height: 80vh; position: relative; z-index: 1; }
+
+  #legend {
+    position: absolute;
+    top: 10px;
+    right: 10px; 
+    z-index: 1001;
+    background: white;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  #data-table {
+    max-height: 20vh;
+    overflow-y: auto;
+    display: block;
+  }
+
+  #data-table thead, #data-table tbody {
+    display: block;
+  }
+
+  #data-table tbody {
+    max-height: 18vh;
+    overflow-y: auto;
+  }
+
+  #data-table th, #data-table td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+    width: 20%;
+    box-sizing: border-box;
+  }
+
+  th { background-color: #f2f2f2; }
+</style>
+
 </head>
 <body>
   <div id="map"></div>
 
   <div id="legend">
+    <button id="toggle-table" style="margin: 10px;">Hide Table</button>
+<div id="table-container">
+  <table id="data-table">
+    <thead>
+      <tr>
+        <th>Incident #</th>
+        <th>Time</th>
+        <th>Problem</th>
+        <th>Address</th>
+        <th>Disposition</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
   <strong>Legend</strong><br>
   <img src="img/Pink.png"   style="height: 20px; vertical-align: middle;"> Assault<br>
     <img src="img/LBlue.png"   style="height: 20px; vertical-align: middle;"> Domestic<br>
@@ -189,6 +221,14 @@ calls
       }
     }
   });
+});
+document.getElementById('toggle-table').addEventListener('click', () => {
+  const container = document.getElementById('table-container');
+  const btn = document.getElementById('toggle-table');
+  const isVisible = container.style.display !== 'none';
+  
+  container.style.display = isVisible ? 'none' : 'block';
+  btn.textContent = isVisible ? 'Show Table' : 'Hide Table';
 });
 
   </script>
