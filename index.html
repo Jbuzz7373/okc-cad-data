@@ -159,7 +159,7 @@ calls
       callTime <= now &&
       !disposition.includes("z-call not entered in cad") &&
       !( /traffic stop|traffic arrest/.test(problem) && callTime > thirtyMinutesAgo )
-    && !Problem.includes("911 WIRELESS-NO EMERG <911WH") ) {
+    ) {
       const color = getMarkerIcon(call.Problem || "");
       const marker = L.marker([call.Latitude, call.Longitude], {
         icon: createIcon(color)
