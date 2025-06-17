@@ -12,40 +12,93 @@
       font-family: Arial, sans-serif;
     }
 
- #map {
-  height: 80vh;
-  transition: height 0.3s ease;
-}
-#map.fullscreen {
-  height: 100vh;
-}
+    #map {
+      height: 80vh;
+      transition: height 0.3s ease;
+    }
 
-#table-container {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: white;
-  height: 20vh;
-  transition: height 0.3s ease, opacity 0.3s ease;
-  overflow: hidden;
-  z-index: 1000;
-  border-top: 1px solid #ccc;
-  opacity: 1;
-}
+    #map.fullscreen {
+      height: 100vh;
+    }
 
-#table-container.hidden {
-  height: 0;
-  opacity: 0;
-  pointer-events: none;
-}
+    #legend {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: white;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 14px;
+      line-height: 1.6;
+      z-index: 1001;
+      max-width: 200px;
+    }
 
-  document.getElementById('close-table').addEventListener('click', () => {
-  tableContainer.style.display = 'none';
-  toggleTableBtn.textContent = 'Show Table';
-  mapDiv.classList.add('fullscreen');
-});
+    #legend button {
+      float: right;
+      background: transparent;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+    }
 
+    #show-legend {
+      display: none;
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      z-index: 1000;
+      padding: 6px 12px;
+      font-size: 14px;
+      background-color: white;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    #toggle-table {
+      position: fixed;
+      bottom: 21vh;
+      right: 10px;
+      z-index: 1001;
+      padding: 10px 14px;
+      font-size: 14px;
+      background-color: white;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    #table-container {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      height: 20vh;
+      transition: height 0.3s ease, opacity 0.3s ease;
+      overflow: hidden;
+      z-index: 1000;
+      border-top: 1px solid #ccc;
+      opacity: 1;
+    }
+
+    #table-container.hidden {
+      height: 0;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    #close-table {
+      position: absolute;
+      top: 4px;
+      right: 8px;
+      font-size: 18px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+    }
 
     #data-table {
       width: 100%;
@@ -126,178 +179,173 @@
   </div>
 
   <script>
-  function maskAddress(address) {
-    return address
-      .replace(/\b(\d{1,5})(?=(-\d{1,5}))/g, m => m.slice(0, Math.max(1, m.length - 2)) + 'XX')
-      .replace(/\b(\d{5})(?=\s)/g, m => m.slice(0, 3) + 'XX')
-      .replace(/\b(\d{4})(?=\s)/g, m => m.slice(0, 2) + 'XX')
-      .replace(/\b(\d{3})(?=\s)/g, m => m.slice(0, 1) + 'XX')
-      .replace(/\b(\d{2})(?=\s)/g, 'XX')
-      .replace(/\b(\d{1})(?=\s)/g, 'X');
-  }
+    const map = L.map('map', {
+      minZoom: 10,
+      maxZoom: 15
+    }).setView([35.4676, -97.5164], 11);
 
-  function getMarkerIcon(problem) {
-    if (/A\.D\.W\.|assault/i.test(problem)) return 'Pink';
-    if (/domestic/i.test(problem)) return 'LBlue';
-    if (/accident/i.test(problem)) return 'Blue';
-    if (/traffic stop|traffic arrest/i.test(problem)) return 'Red';
-    if (/check the welfare/i.test(problem)) return 'Black';
-    if (/911/i.test(problem)) return 'Marron';
-    if (/disturb/i.test(problem)) return 'Orange';
-    if (/alarm/i.test(problem)) return 'DGreen';
-    if (/vandalism/i.test(problem)) return 'Aqua';
-    if (/citizen assist/i.test(problem)) return 'Brown';
-    if (/dui|drunk/i.test(problem)) return 'Green';
-    if (/burglary/i.test(problem)) return 'Yellow';
-    if (/white collar/i.test(problem)) return 'Purple';
-    return 'Grey';
-  }
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
 
-  function createIcon(name) {
-    return L.icon({
-      iconUrl: `img/${name}.png`,
-      shadowUrl: 'img/marker-shadow.png',
-      iconSize: [25, 41],
-      iconAnchor: [12, 41],
-      popupAnchor: [1, -34],
-      shadowSize: [41, 41]
+    const mapDiv = document.getElementById('map');
+    const tableContainer = document.getElementById('table-container');
+    const toggleTableBtn = document.getElementById('toggle-table');
+    const closeTableBtn = document.getElementById('close-table');
+
+    function resizeMapAfterTransition() {
+      setTimeout(() => map.invalidateSize(), 310);
+    }
+
+    function hideTable() {
+      tableContainer.classList.add('hidden');
+      mapDiv.classList.add('fullscreen');
+      toggleTableBtn.textContent = 'Show Table';
+      resizeMapAfterTransition();
+    }
+
+    function showTable() {
+      tableContainer.classList.remove('hidden');
+      mapDiv.classList.remove('fullscreen');
+      toggleTableBtn.textContent = 'Hide Table';
+      resizeMapAfterTransition();
+    }
+
+    toggleTableBtn.addEventListener('click', () => {
+      const isHidden = tableContainer.classList.contains('hidden');
+      isHidden ? showTable() : hideTable();
     });
-  }
 
-  const map = L.map('map', {
-    minZoom: 10,
-    maxZoom: 15
-  }).setView([35.4676, -97.5164], 11);
+    closeTableBtn.addEventListener('click', hideTable);
 
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap contributors'
-  }).addTo(map);
+    document.getElementById('close-legend').addEventListener('click', () => {
+      document.getElementById('legend').style.display = 'none';
+      document.getElementById('show-legend').style.display = 'block';
+    });
 
-  const mapDiv = document.getElementById('map');
-  const tableContainer = document.getElementById('table-container');
-  const toggleTableBtn = document.getElementById('toggle-table');
-  const closeTableBtn = document.getElementById('close-table');
+    document.getElementById('show-legend').addEventListener('click', () => {
+      document.getElementById('legend').style.display = 'block';
+      document.getElementById('show-legend').style.display = 'none';
+    });
 
-  function resizeMapAfterTransition() {
-    setTimeout(() => map.invalidateSize(), 310);
-  }
+    function maskAddress(address) {
+      return address
+        .replace(/\b(\d{1,5})(?=(-\d{1,5}))/g, m => m.slice(0, Math.max(1, m.length - 2)) + 'XX')
+        .replace(/\b(\d{5})(?=\s)/g, m => m.slice(0, 3) + 'XX')
+        .replace(/\b(\d{4})(?=\s)/g, m => m.slice(0, 2) + 'XX')
+        .replace(/\b(\d{3})(?=\s)/g, m => m.slice(0, 1) + 'XX')
+        .replace(/\b(\d{2})(?=\s)/g, 'XX')
+        .replace(/\b(\d{1})(?=\s)/g, 'X');
+    }
 
-  function hideTable() {
-    tableContainer.classList.add('hidden');
-    mapDiv.classList.add('fullscreen');
-    toggleTableBtn.textContent = 'Show Table';
-    resizeMapAfterTransition();
-  }
+    function getMarkerIcon(problem) {
+      if (/A\.D\.W\.|assault/i.test(problem)) return 'Pink';
+      if (/domestic/i.test(problem)) return 'LBlue';
+      if (/accident/i.test(problem)) return 'Blue';
+      if (/traffic stop|traffic arrest/i.test(problem)) return 'Red';
+      if (/check the welfare/i.test(problem)) return 'Black';
+      if (/911/i.test(problem)) return 'Marron';
+      if (/disturb/i.test(problem)) return 'Orange';
+      if (/alarm/i.test(problem)) return 'DGreen';
+      if (/vandalism/i.test(problem)) return 'Aqua';
+      if (/citizen assist/i.test(problem)) return 'Brown';
+      if (/dui|drunk/i.test(problem)) return 'Green';
+      if (/burglary/i.test(problem)) return 'Yellow';
+      if (/white collar/i.test(problem)) return 'Purple';
+      return 'Grey';
+    }
 
-  function showTable() {
-    tableContainer.classList.remove('hidden');
-    mapDiv.classList.remove('fullscreen');
-    toggleTableBtn.textContent = 'Hide Table';
-    resizeMapAfterTransition();
-  }
-
-  toggleTableBtn.addEventListener('click', () => {
-    const isHidden = tableContainer.classList.contains('hidden');
-    isHidden ? showTable() : hideTable();
-  });
-
-  closeTableBtn.addEventListener('click', hideTable);
-
-  document.getElementById('close-legend').addEventListener('click', () => {
-    document.getElementById('legend').style.display = 'none';
-    document.getElementById('show-legend').style.display = 'block';
-  });
-
-  document.getElementById('show-legend').addEventListener('click', () => {
-    document.getElementById('legend').style.display = 'block';
-    document.getElementById('show-legend').style.display = 'none';
-  });
-
-  let markers = [];
-
-  function loadCalls() {
-    fetch('CadCalls.json?_=' + new Date().getTime())
-      .then(response => response.json())
-      .then(calls => {
-        // Clear existing markers
-        markers.forEach(m => map.removeLayer(m));
-        markers = [];
-
-        const tbody = document.querySelector('#data-table tbody');
-        tbody.innerHTML = '';
-
-        const now = new Date();
-        const twelveHoursAgo = new Date(now.getTime() - 12 * 60 * 60 * 1000);
-        const thirtyMinutesAgo = new Date(now.getTime() - 30 * 60 * 1000);
-
-        calls
-          .sort((a, b) => new Date(b.ResponseDate) - new Date(a.ResponseDate))
-          .forEach(call => {
-            const callTime = new Date(call.ResponseDate);
-            const disposition = (call.Disposition || "").toLowerCase();
-            const problem = (call.Problem || "").toLowerCase();
-
-            if (
-              problem.includes("911 wireless-no emerg") ||
-              problem.includes("911 hang up") ||
-              problem.includes("911 text")
-            ) return;
-
-            const maskedAddress = maskAddress(call.Address || "");
-            let row = null;
-
-            if (!disposition.includes("z-call not entered in cad")) {
-              row = document.createElement('tr');
-              row.innerHTML = `
-                <td>${call.IncidentNumber}</td>
-                <td>${new Date(call.ResponseDate).toLocaleString()}</td>
-                <td>${call.Problem}</td>
-                <td>${maskedAddress}</td>
-                <td>${call.Disposition}</td>
-              `;
-              tbody.appendChild(row);
-            }
-
-            if (
-              callTime >= twelveHoursAgo &&
-              callTime <= now &&
-              !disposition.includes("z-call not entered in cad") &&
-              !( /traffic stop|traffic arrest/.test(problem) && callTime > thirtyMinutesAgo )
-            ) {
-              const color = getMarkerIcon(call.Problem || "");
-              const marker = L.marker([call.Latitude, call.Longitude], {
-                icon: createIcon(color)
-              }).addTo(map);
-
-              marker.bindPopup(`
-                <div style="font-size: 16px;">
-                  <b>${new Date(call.ResponseDate).toLocaleString()}</b><br>
-                  ${call.Problem}<br>
-                  ${maskedAddress}<br>
-                  ${call.Disposition}<br>
-                  ${call.IncidentNumber}
-                </div>
-              `);
-
-              markers.push(marker);
-
-              if (row) {
-                row.onclick = () => {
-                  map.setView([call.Latitude, call.Longitude], 15);
-                  marker.openPopup();
-                };
-              }
-            }
-          });
+    function createIcon(name) {
+      return L.icon({
+        iconUrl: `img/${name}.png`,
+        shadowUrl: 'img/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
       });
-  }
+    }
 
-  // Initial load
-  loadCalls();
+    let markers = [];
 
-  // Auto-refresh every 3 minutes
-  setInterval(loadCalls, 180000);
-</script>
+    function loadCalls() {
+      fetch('CadCalls.json?_=' + new Date().getTime())
+        .then(response => response.json())
+        .then(calls => {
+          markers.forEach(m => map.removeLayer(m));
+          markers = [];
 
+          const tbody = document.querySelector('#data-table tbody');
+          tbody.innerHTML = '';
+
+          const now = new Date();
+          const twelveHoursAgo = new Date(now.getTime() - 12 * 60 * 60 * 1000);
+          const thirtyMinutesAgo = new Date(now.getTime() - 30 * 60 * 1000);
+
+          calls
+            .sort((a, b) => new Date(b.ResponseDate) - new Date(a.ResponseDate))
+            .forEach(call => {
+              const callTime = new Date(call.ResponseDate);
+              const disposition = (call.Disposition || "").toLowerCase();
+              const problem = (call.Problem || "").toLowerCase();
+
+              if (
+                problem.includes("911 wireless-no emerg") ||
+                problem.includes("911 hang up") ||
+                problem.includes("911 text")
+              ) return;
+
+              const maskedAddress = maskAddress(call.Address || "");
+              let row = null;
+
+              if (!disposition.includes("z-call not entered in cad")) {
+                row = document.createElement('tr');
+                row.innerHTML = `
+                  <td>${call.IncidentNumber}</td>
+                  <td>${new Date(call.ResponseDate).toLocaleString()}</td>
+                  <td>${call.Problem}</td>
+                  <td>${maskedAddress}</td>
+                  <td>${call.Disposition}</td>
+                `;
+                tbody.appendChild(row);
+              }
+
+              if (
+                callTime >= twelveHoursAgo &&
+                callTime <= now &&
+                !disposition.includes("z-call not entered in cad") &&
+                !( /traffic stop|traffic arrest/.test(problem) && callTime > thirtyMinutesAgo )
+              ) {
+                const color = getMarkerIcon(call.Problem || "");
+                const marker = L.marker([call.Latitude, call.Longitude], {
+                  icon: createIcon(color)
+                }).addTo(map);
+
+                marker.bindPopup(`
+                  <div style="font-size: 16px;">
+                    <b>${new Date(call.ResponseDate).toLocaleString()}</b><br>
+                    ${call.Problem}<br>
+                    ${maskedAddress}<br>
+                    ${call.Disposition}<br>
+                    ${call.IncidentNumber}
+                  </div>
+                `);
+
+                markers.push(marker);
+
+                if (row) {
+                  row.onclick = () => {
+                    map.setView([call.Latitude, call.Longitude], 15);
+                    marker.openPopup();
+                  };
+                }
+              }
+            });
+        });
+    }
+
+    loadCalls();
+    setInterval(loadCalls, 180000);
+  </script>
 </body>
 </html>
