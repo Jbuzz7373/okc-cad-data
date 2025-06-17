@@ -9,52 +9,7 @@
   <style>
   body { margin: 0; font-family: Arial, sans-serif; }
   #map { height: 80vh; position: relative; z-index: 1; }
-
-  #legend {
-    position: absolute;
-    top: 10px;
-    right: 10px; 
-    z-index: 1001;
-    background: white;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 14px;
-    line-height: 1.6;
-  }
-
-  #data-table {
-    max-height: 20vh;
-    overflow-y: auto;
-    display: block;
-  }
-
-  #data-table thead, #data-table tbody {
-    display: block;
-  }
-
-  #data-table tbody {
-    max-height: 18vh;
-    overflow-y: auto;
-  }
-
-  #data-table th, #data-table td {
-    padding: 8px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
-    width: 20%;
-    box-sizing: border-box;
-  }
-
-  th { background-color: #f2f2f2; }
-</style>
-
-</head>
-<body>
-  <div id="map"></div>
-
-  <div id="legend">
-    <button id="toggle-table" style="margin: 10px;">Hide Table</button>
+  <button id="toggle-table" style="margin: 10px;">Hide Table</button>
 <div id="table-container">
   <table id="data-table">
     <thead>
@@ -70,6 +25,58 @@
   </table>
 </div>
 
+#table-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  max-height: 20vh;
+  overflow-y: auto;
+  z-index: 1000;
+  border-top: 1px solid #ccc;
+}
+
+#data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#data-table thead, #data-table tbody {
+  display: block;
+}
+
+#data-table tbody {
+  max-height: 18vh;
+  overflow-y: auto;
+}
+
+#data-table th, #data-table td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+  width: 20%;
+  box-sizing: border-box;
+}
+
+#toggle-table {
+  position: fixed;
+  bottom: 21vh;
+  right: 10px;
+  z-index: 1001;
+  padding: 5px 10px;
+}
+
+
+  th { background-color: #f2f2f2; }
+</style>
+
+</head>
+<body>
+  <div id="map"></div>
+
+  <div id="legend">
+  
   <strong>Legend</strong><br>
   <img src="img/Pink.png"   style="height: 20px; vertical-align: middle;"> Assault<br>
     <img src="img/LBlue.png"   style="height: 20px; vertical-align: middle;"> Domestic<br>
