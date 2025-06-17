@@ -14,35 +14,19 @@
 
     #map {
       height: 80vh;
-      z-index: 1;
     }
-#show-legend {
-  display: none;
-  position: fixed;
-  top: 10px;
-  right: 10px;
-  z-index: 1000;
-  padding: 6px 10px;
-  font-size: 14px;
-  background-color: white;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  cursor: pointer;
-}
 
-    #legend
-    <button id="show-legend" style="display:none; position: fixed; top: 10px; right: 10px; z-index: 1000;">Show Legend</button>
-{
+    #legend {
       position: fixed;
       top: 10px;
       right: 10px;
-      z-index: 1001;
       background: white;
       padding: 10px;
       border: 1px solid #ccc;
       border-radius: 5px;
       font-size: 14px;
       line-height: 1.6;
+      z-index: 1001;
       max-width: 200px;
     }
 
@@ -54,12 +38,31 @@
       cursor: pointer;
     }
 
+    #show-legend {
+      display: none;
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      z-index: 1000;
+      padding: 6px 12px;
+      font-size: 14px;
+      background-color: white;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
     #toggle-table {
       position: fixed;
       bottom: 21vh;
       right: 10px;
       z-index: 1001;
-      padding: 5px 10px;
+      padding: 10px 14px;
+      font-size: 14px;
+      background-color: white;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      cursor: pointer;
     }
 
     #table-container {
@@ -127,21 +130,22 @@
   <div id="legend">
     <button id="close-legend">×</button>
     <strong>Legend</strong><br>
-    <img src="img/Pink.png" style="height: 20px; vertical-align: middle;"> Assault<br>
-    <img src="img/LBlue.png" style="height: 20px; vertical-align: middle;"> Domestic<br>
-    <img src="img/Blue.png" style="height: 20px; vertical-align: middle;"> Traffic Accident<br>
-    <img src="img/Red.png" style="height: 20px; vertical-align: middle;"> Traffic Stop/Arrest<br>
-    <img src="img/Black.png" style="height: 20px; vertical-align: middle;"> Check Welfare<br>
-    <img src="img/Orange.png" style="height: 20px; vertical-align: middle;"> Disturbance<br>
-    <img src="img/DGreen.png" style="height: 20px; vertical-align: middle;"> Alarm<br>
-    <img src="img/Aqua.png" style="height: 20px; vertical-align: middle;"> Vandalism<br>
-    <img src="img/Brown.png" style="height: 20px; vertical-align: middle;"> Citizen Assist<br>
-    <img src="img/Green.png" style="height: 20px; vertical-align: middle;"> DUI<br>
-    <img src="img/Yellow.png" style="height: 20px; vertical-align: middle;"> Burglary<br>
-    <img src="img/Purple.png" style="height: 20px; vertical-align: middle;"> White Collar<br>
-    <img src="img/Grey.png" style="height: 20px; vertical-align: middle;"> All Other
+    <img src="img/Pink.png" style="height: 20px;"> Assault<br>
+    <img src="img/LBlue.png" style="height: 20px;"> Domestic<br>
+    <img src="img/Blue.png" style="height: 20px;"> Traffic Accident<br>
+    <img src="img/Red.png" style="height: 20px;"> Traffic Stop/Arrest<br>
+    <img src="img/Black.png" style="height: 20px;"> Check Welfare<br>
+    <img src="img/Orange.png" style="height: 20px;"> Disturbance<br>
+    <img src="img/DGreen.png" style="height: 20px;"> Alarm<br>
+    <img src="img/Aqua.png" style="height: 20px;"> Vandalism<br>
+    <img src="img/Brown.png" style="height: 20px;"> Citizen Assist<br>
+    <img src="img/Green.png" style="height: 20px;"> DUI<br>
+    <img src="img/Yellow.png" style="height: 20px;"> Burglary<br>
+    <img src="img/Purple.png" style="height: 20px;"> White Collar<br>
+    <img src="img/Grey.png" style="height: 20px;"> All Other
   </div>
 
+  <button id="show-legend">Show Legend</button>
   <button id="toggle-table">Hide Table</button>
 
   <div id="table-container">
@@ -149,11 +153,11 @@
     <table id="data-table">
       <thead>
         <tr>
-          <th style="width: 20%;">Incident #</th>
-          <th style="width: 20%;">Time</th>
-          <th style="width: 20%;">Problem</th>
-          <th style="width: 20%;">Address</th>
-          <th style="width: 20%;">Disposition</th>
+          <th>Incident #</th>
+          <th>Time</th>
+          <th>Problem</th>
+          <th>Address</th>
+          <th>Disposition</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -163,10 +167,10 @@
   <script>
     function maskAddress(address) {
       return address
-        .replace(/\b(\d{1,5})(?=(-\d{1,5}))/g, (m) => m.slice(0, Math.max(1, m.length - 2)) + 'XX')
-        .replace(/\b(\d{5})(?=\s)/g, (m) => m.slice(0, 3) + 'XX')
-        .replace(/\b(\d{4})(?=\s)/g, (m) => m.slice(0, 2) + 'XX')
-        .replace(/\b(\d{3})(?=\s)/g, (m) => m.slice(0, 1) + 'XX')
+        .replace(/\b(\d{1,5})(?=(-\d{1,5}))/g, m => m.slice(0, Math.max(1, m.length - 2)) + 'XX')
+        .replace(/\b(\d{5})(?=\s)/g, m => m.slice(0, 3) + 'XX')
+        .replace(/\b(\d{4})(?=\s)/g, m => m.slice(0, 2) + 'XX')
+        .replace(/\b(\d{3})(?=\s)/g, m => m.slice(0, 1) + 'XX')
         .replace(/\b(\d{2})(?=\s)/g, 'XX')
         .replace(/\b(\d{1})(?=\s)/g, 'X');
     }
@@ -230,8 +234,8 @@
             ) return;
 
             const maskedAddress = maskAddress(call.Address || "");
-
             let row = null;
+
             if (!disposition.includes("z-call not entered in cad")) {
               row = document.createElement('tr');
               row.innerHTML = `
@@ -283,13 +287,107 @@
       btn.textContent = isVisible ? 'Show Table' : 'Hide Table';
     });
 
-    document.getElementById('close-legend').addEventListener('click', () => {
-      document.getElementById('legend').style.display = 'none';
-    });
-
     document.getElementById('close-table').addEventListener('click', () => {
       document.getElementById('table-container').style.display = 'none';
       document.getElementById('toggle-table').textContent = 'Show Table';
     });
+
+    document.getElementById('close-legend').addEventListener('click', () => {
+      document.getElementById('legend').style.display = 'none';
+      document.getElementById('show-legend').style.display = 'block';
+    });
+
+    document.getElementById('show-legend').addEventListener('click', () => {
+      document.getElementById('legend').style.display = 'block';
+      document.getElementById('show-legend').style.display = 'none';
+    });
+
+    let markers = [];
+
+function loadCalls() {
+  fetch('CadCalls.json?_=' + new Date().getTime())
+    .then(response => response.json())
+    .then(calls => {
+      // Clear existing markers
+      markers.forEach(m => map.removeLayer(m));
+      markers = [];
+
+      // Clear table rows
+      const tbody = document.querySelector('#data-table tbody');
+      tbody.innerHTML = '';
+
+      const now = new Date();
+      const twelveHoursAgo = new Date(now.getTime() - 12 * 60 * 60 * 1000);
+      const thirtyMinutesAgo = new Date(now.getTime() - 30 * 60 * 1000);
+
+      calls
+        .sort((a, b) => new Date(b.ResponseDate) - new Date(a.ResponseDate))
+        .forEach(call => {
+          const callTime = new Date(call.ResponseDate);
+          const disposition = (call.Disposition || "").toLowerCase();
+          const problem = (call.Problem || "").toLowerCase();
+
+          if (
+            problem.includes("911 wireless-no emerg") ||
+            problem.includes("911 hang up") ||
+            problem.includes("911 text")
+          ) return;
+
+          const maskedAddress = maskAddress(call.Address || "");
+
+          let row = null;
+          if (!disposition.includes("z-call not entered in cad")) {
+            row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${call.IncidentNumber}</td>
+              <td>${new Date(call.ResponseDate).toLocaleString()}</td>
+              <td>${call.Problem}</td>
+              <td>${maskedAddress}</td>
+              <td>${call.Disposition}</td>
+            `;
+            tbody.appendChild(row);
+          }
+
+          if (
+            callTime >= twelveHoursAgo &&
+            callTime <= now &&
+            !disposition.includes("z-call not entered in cad") &&
+            !( /traffic stop|traffic arrest/.test(problem) && callTime > thirtyMinutesAgo )
+          ) {
+            const color = getMarkerIcon(call.Problem || "");
+            const marker = L.marker([call.Latitude, call.Longitude], {
+              icon: createIcon(color)
+            }).addTo(map);
+
+            marker.bindPopup(`
+              <div style="font-size: 16px;">
+                <b>${new Date(call.ResponseDate).toLocaleString()}</b><br>
+                ${call.Problem}<br>
+                ${maskedAddress}<br>
+                ${call.Disposition}<br>
+                ${call.IncidentNumber}
+              </div>
+            `);
+
+            markers.push(marker);
+
+            if (row) {
+              row.onclick = () => {
+                map.setView([call.Latitude, call.Longitude], 15);
+                marker.openPopup();
+              };
+            }
+          }
+        });
+    });
+}
+
+// Initial load
+loadCalls();
+
+// Auto-refresh every 3 minutes (180,000 ms)
+setInterval(loadCalls, 180000);
+
   </script>
+</body>
 </html>
