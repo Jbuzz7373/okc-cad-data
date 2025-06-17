@@ -137,7 +137,11 @@ calls
     const callTime = new Date(call.ResponseDate);
     const disposition = (call.Disposition || "").toLowerCase();
     const problem = (call.Problem || "").toLowerCase();
-    if (problem.includes("911 wireless-no emerg")) return;
+    if (
+  problem.includes("911 wireless-no emerg") ||
+  problem.includes("911 hang up")
+) return;
+
     const maskedAddress = maskAddress(call.Address || "");
 
     // Always create row (if not z-call)
