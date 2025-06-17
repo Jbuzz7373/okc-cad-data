@@ -7,155 +7,163 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
-  body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-}
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
 
-#map {
-  height: 80vh;
-  position: relative;
-  z-index: 1;
-}
- <button id="toggle-table">Hide Table</button>
-
-<div id="table-container">
-  <button id="close-table" style="float:right; margin: 5px;">×</button>
-  <table id="data-table">
-    <thead>
-      <tr>
-        <th style="width: 20%;">Incident #</th>
-        <th style="width: 20%;">Time</th>
-        <th style="width: 20%;">Problem</th>
-        <th style="width: 20%;">Address</th>
-        <th style="width: 20%;">Disposition</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-</div>
-
-
-#table-container {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: white;
-  max-height: 20vh;
-  overflow-y: auto;
-  z-index: 1000;
-  border-top: 1px solid #ccc;
-}
-
-#legend {
+    #map {
+      height: 80vh;
+      z-index: 1;
+    }
+#show-legend {
+  display: none;
   position: fixed;
   top: 10px;
   right: 10px;
-  z-index: 1001;
-  background: white;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 14px;
-  line-height: 1.6;
-  max-width: 200px;
-}
-
-#table-container {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: white;
-  max-height: 20vh;
-  overflow-y: auto;
   z-index: 1000;
-  border-top: 1px solid #ccc;
+  padding: 6px 10px;
+  font-size: 14px;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
-#data-table {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed;
-}
+    #legend
+    <button id="show-legend" style="display:none; position: fixed; top: 10px; right: 10px; z-index: 1000;">Show Legend</button>
+{
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      z-index: 1001;
+      background: white;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 14px;
+      line-height: 1.6;
+      max-width: 200px;
+    }
 
-#data-table thead, #data-table tbody {
-  display: block;
-}
+    #legend button {
+      float: right;
+      background: transparent;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+    }
 
-#data-table tbody {
-  max-height: 16vh;
-  overflow-y: auto;
-}
+    #toggle-table {
+      position: fixed;
+      bottom: 21vh;
+      right: 10px;
+      z-index: 1001;
+      padding: 5px 10px;
+    }
 
-#data-table th, #data-table td {
-  padding: 8px;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
-  box-sizing: border-box;
-}
+    #table-container {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      max-height: 20vh;
+      overflow: hidden;
+      z-index: 1000;
+      border-top: 1px solid #ccc;
+    }
 
-th {
-  background-color: #f2f2f2;
-}
+    #close-table {
+      float: right;
+      background: transparent;
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+      margin: 5px;
+    }
 
-#toggle-table {
-  position: fixed;
-  bottom: 21vh;
-  right: 10px;
-  z-index: 1001;
-  padding: 5px 10px;
-}
+    #data-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
 
+    #data-table thead,
+    #data-table tbody {
+      display: table;
+      width: 100%;
+      table-layout: fixed;
+    }
 
-  th { background-color: #f2f2f2; }
-</style>
+    #data-table tbody {
+      display: block;
+      max-height: 16vh;
+      overflow-y: auto;
+    }
 
+    #data-table tr {
+      display: table;
+      width: 100%;
+      table-layout: fixed;
+    }
+
+    #data-table th,
+    #data-table td {
+      padding: 8px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+      box-sizing: border-box;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+  </style>
 </head>
 <body>
   <div id="map"></div>
-<div id="legend">
-  <button id="close-legend" style="float:right;">×</button>
-  <strong>Legend</strong><br>
-  <img src="img/Pink.png" style="height: 20px; vertical-align: middle;"> Assault<br>
-  <img src="img/LBlue.png" style="height: 20px; vertical-align: middle;"> Domestic<br>
-  <img src="img/Blue.png" style="height: 20px; vertical-align: middle;"> Traffic Accident<br>
-  <img src="img/Red.png" style="height: 20px; vertical-align: middle;"> Traffic Stop/Arrest<br>
-  <img src="img/Black.png" style="height: 20px; vertical-align: middle;"> Check Welfare<br>
-  <img src="img/Marron.png" style="height: 20px; vertical-align: middle;"> 911<br>
-  <img src="img/Orange.png" style="height: 20px; vertical-align: middle;"> Disturbance<br>
-  <img src="img/DGreen.png" style="height: 20px; vertical-align: middle;"> Alarm<br>
-  <img src="img/Aqua.png" style="height: 20px; vertical-align: middle;"> Vandalism<br>
-  <img src="img/Brown.png" style="height: 20px; vertical-align: middle;"> Citizen Assist<br>  
-  <img src="img/Green.png" style="height: 20px; vertical-align: middle;"> DUI<br>
-  <img src="img/Yellow.png" style="height: 20px; vertical-align: middle;"> Burglary<br>  
-  <img src="img/Purple.png" style="height: 20px; vertical-align: middle;"> White Collar<br>
-  <img src="img/Grey.png" style="height: 20px; vertical-align: middle;"> All Other
-</div>
 
+  <div id="legend">
+    <button id="close-legend">×</button>
+    <strong>Legend</strong><br>
+    <img src="img/Pink.png" style="height: 20px; vertical-align: middle;"> Assault<br>
+    <img src="img/LBlue.png" style="height: 20px; vertical-align: middle;"> Domestic<br>
+    <img src="img/Blue.png" style="height: 20px; vertical-align: middle;"> Traffic Accident<br>
+    <img src="img/Red.png" style="height: 20px; vertical-align: middle;"> Traffic Stop/Arrest<br>
+    <img src="img/Black.png" style="height: 20px; vertical-align: middle;"> Check Welfare<br>
+    <img src="img/Orange.png" style="height: 20px; vertical-align: middle;"> Disturbance<br>
+    <img src="img/DGreen.png" style="height: 20px; vertical-align: middle;"> Alarm<br>
+    <img src="img/Aqua.png" style="height: 20px; vertical-align: middle;"> Vandalism<br>
+    <img src="img/Brown.png" style="height: 20px; vertical-align: middle;"> Citizen Assist<br>
+    <img src="img/Green.png" style="height: 20px; vertical-align: middle;"> DUI<br>
+    <img src="img/Yellow.png" style="height: 20px; vertical-align: middle;"> Burglary<br>
+    <img src="img/Purple.png" style="height: 20px; vertical-align: middle;"> White Collar<br>
+    <img src="img/Grey.png" style="height: 20px; vertical-align: middle;"> All Other
+  </div>
 
-  <table id="data-table">
-    <thead>
-      <tr>
-        <th>Incident #</th>
-        <th>Time</th>
-        <th>Problem</th>
-        <th>Address</th>
-        <th>Disposition</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  <button id="toggle-table">Hide Table</button>
+
+  <div id="table-container">
+    <button id="close-table">×</button>
+    <table id="data-table">
+      <thead>
+        <tr>
+          <th style="width: 20%;">Incident #</th>
+          <th style="width: 20%;">Time</th>
+          <th style="width: 20%;">Problem</th>
+          <th style="width: 20%;">Address</th>
+          <th style="width: 20%;">Disposition</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 
   <script>
     function maskAddress(address) {
-      return address.replace(/\b(\d{1,5})(?=(-\d{1,5}))/g, (m) => {
-          if (m.length === 5) return m.slice(0, 3) + 'XX';
-          if (m.length === 4) return m.slice(0, 2) + 'XX';
-          if (m.length === 3) return m.slice(0, 1) + 'XX';
-          return 'X'.repeat(m.length);
-        })
+      return address
+        .replace(/\b(\d{1,5})(?=(-\d{1,5}))/g, (m) => m.slice(0, Math.max(1, m.length - 2)) + 'XX')
         .replace(/\b(\d{5})(?=\s)/g, (m) => m.slice(0, 3) + 'XX')
         .replace(/\b(\d{4})(?=\s)/g, (m) => m.slice(0, 2) + 'XX')
         .replace(/\b(\d{3})(?=\s)/g, (m) => m.slice(0, 1) + 'XX')
@@ -163,35 +171,33 @@ th {
         .replace(/\b(\d{1})(?=\s)/g, 'X');
     }
 
-function getMarkerIcon(problem) {
-  if (/A\.D\.W\.|assault/i.test(problem)) return 'Pink';
-  if (/domestic/i.test(problem)) return 'LBlue';
-  if (/accident/i.test(problem)) return 'Blue';
-  if (/traffic stop|traffic arrest/i.test(problem)) return 'Red';
-  if (/check the welfare/i.test(problem)) return 'Black';
-  if (/disturb/i.test(problem)) return 'Orange';
-  if (/alarm/i.test(problem)) return 'DGreen';
-  if (/vandalism/i.test(problem)) return 'Aqua';
-  if (/citizen assist/i.test(problem)) return 'Brown';
-  if (/dui|drunk/i.test(problem)) return 'Green';
-  if (/burglary/i.test(problem)) return 'Yellow';
-  if (/white collar/i.test(problem)) return 'Purple';
-  return 'Grey'; // Default for anything not matched
-}
+    function getMarkerIcon(problem) {
+      if (/A\.D\.W\.|assault/i.test(problem)) return 'Pink';
+      if (/domestic/i.test(problem)) return 'LBlue';
+      if (/accident/i.test(problem)) return 'Blue';
+      if (/traffic stop|traffic arrest/i.test(problem)) return 'Red';
+      if (/check the welfare/i.test(problem)) return 'Black';
+      if (/911/i.test(problem)) return 'Marron';
+      if (/disturb/i.test(problem)) return 'Orange';
+      if (/alarm/i.test(problem)) return 'DGreen';
+      if (/vandalism/i.test(problem)) return 'Aqua';
+      if (/citizen assist/i.test(problem)) return 'Brown';
+      if (/dui|drunk/i.test(problem)) return 'Green';
+      if (/burglary/i.test(problem)) return 'Yellow';
+      if (/white collar/i.test(problem)) return 'Purple';
+      return 'Grey';
+    }
 
-
-
-function createIcon(name) {
-  return L.icon({
-    iconUrl: `img/${name}.png`,
-    shadowUrl: 'img/marker-shadow.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41]
-  });
-}
-
+    function createIcon(name) {
+      return L.icon({
+        iconUrl: `img/${name}.png`,
+        shadowUrl: 'img/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+      });
+    }
 
     const map = L.map('map', {
       minZoom: 10,
@@ -202,99 +208,88 @@ function createIcon(name) {
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-  fetch('CadCalls.json?_=' + new Date().getTime())
-  .then(response => response.json())
-  .then(calls => {
-    const tbody = document.querySelector('#data-table tbody');
-    const now = new Date();
-    const threeHoursAgo = new Date(now.getTime() - 3 * 60 * 60 * 1000);
-    const thirtyMinutesAgo = new Date(now.getTime() - 30 * 60 * 1000);
+    fetch('CadCalls.json?_=' + new Date().getTime())
+      .then(response => response.json())
+      .then(calls => {
+        const tbody = document.querySelector('#data-table tbody');
+        const now = new Date();
+        const twelveHoursAgo = new Date(now.getTime() - 12 * 60 * 60 * 1000);
+        const thirtyMinutesAgo = new Date(now.getTime() - 30 * 60 * 1000);
 
-calls
-  .sort((a, b) => new Date(b.ResponseDate) - new Date(a.ResponseDate))
-  .forEach(call => {
-    const callTime = new Date(call.ResponseDate);
-    const disposition = (call.Disposition || "").toLowerCase();
-    const problem = (call.Problem || "").toLowerCase();
-    if (
-  problem.includes("911 wireless-no emerg") ||
-  problem.includes("911 hang up") ||
-  problem.includes("911 TEXT")
-) return;
+        calls
+          .sort((a, b) => new Date(b.ResponseDate) - new Date(a.ResponseDate))
+          .forEach(call => {
+            const callTime = new Date(call.ResponseDate);
+            const disposition = (call.Disposition || "").toLowerCase();
+            const problem = (call.Problem || "").toLowerCase();
 
-    const maskedAddress = maskAddress(call.Address || "");
+            if (
+              problem.includes("911 wireless-no emerg") ||
+              problem.includes("911 hang up") ||
+              problem.includes("911 text")
+            ) return;
 
-    // Always create row (if not z-call)
-    let row = null;
-    if (!disposition.includes("z-call not entered in cad")) {
-      row = document.createElement('tr');
-      row.innerHTML = `
-        <td>${call.IncidentNumber}</td>
-        <td>${new Date(call.ResponseDate).toLocaleString()}</td>
-        <td>${call.Problem}</td>
-        <td>${maskedAddress}</td>
-        <td>${call.Disposition}</td>
-      `;
-      document.querySelector('#data-table tbody').appendChild(row);
-    }
+            const maskedAddress = maskAddress(call.Address || "");
 
-    // Conditionally create marker
-    if (
-      callTime >= threeHoursAgo &&
-      callTime <= now &&
-      !disposition.includes("z-call not entered in cad") &&
-      !( /traffic stop|traffic arrest/.test(problem) && callTime > thirtyMinutesAgo )
-    ) {
-      const color = getMarkerIcon(call.Problem || "");
-      const marker = L.marker([call.Latitude, call.Longitude], {
-        icon: createIcon(color)
-      }).addTo(map);
+            let row = null;
+            if (!disposition.includes("z-call not entered in cad")) {
+              row = document.createElement('tr');
+              row.innerHTML = `
+                <td>${call.IncidentNumber}</td>
+                <td>${new Date(call.ResponseDate).toLocaleString()}</td>
+                <td>${call.Problem}</td>
+                <td>${maskedAddress}</td>
+                <td>${call.Disposition}</td>
+              `;
+              tbody.appendChild(row);
+            }
 
-      marker.bindPopup(`
-        <div style="font-size: 16px;">
-          <b>${new Date(call.ResponseDate).toLocaleString()}</b><br>
-          ${call.Problem}<br>
-          ${maskedAddress}<br>
-          ${call.Disposition}<br>
-          ${call.IncidentNumber}
-        </div>
-      `);
+            if (
+              callTime >= twelveHoursAgo &&
+              callTime <= now &&
+              !disposition.includes("z-call not entered in cad") &&
+              !( /traffic stop|traffic arrest/.test(problem) && callTime > thirtyMinutesAgo )
+            ) {
+              const color = getMarkerIcon(call.Problem || "");
+              const marker = L.marker([call.Latitude, call.Longitude], {
+                icon: createIcon(color)
+              }).addTo(map);
 
-      if (row) {
-        row.onclick = () => {
-          map.setView([call.Latitude, call.Longitude], 15);
-          marker.openPopup();
-        };
-      }
-    }
-  });
-});
-document.getElementById('toggle-table').addEventListener('click', () => {
-  const container = document.getElementById('table-container');
-  const btn = document.getElementById('toggle-table');
-  const isVisible = container.style.display !== 'none';
-  
-  container.style.display = isVisible ? 'none' : 'block';
-  btn.textContent = isVisible ? 'Show Table' : 'Hide Table';
-});
-document.getElementById('toggle-table').addEventListener('click', () => {
-  const container = document.getElementById('table-container');
-  const btn = document.getElementById('toggle-table');
-  const isVisible = container.style.display !== 'none';
+              marker.bindPopup(`
+                <div style="font-size: 16px;">
+                  <b>${new Date(call.ResponseDate).toLocaleString()}</b><br>
+                  ${call.Problem}<br>
+                  ${maskedAddress}<br>
+                  ${call.Disposition}<br>
+                  ${call.IncidentNumber}
+                </div>
+              `);
 
-  container.style.display = isVisible ? 'none' : 'block';
-  btn.textContent = isVisible ? 'Show Table' : 'Hide Table';
-});
+              if (row) {
+                row.onclick = () => {
+                  map.setView([call.Latitude, call.Longitude], 15);
+                  marker.openPopup();
+                };
+              }
+            }
+          });
+      });
 
-document.getElementById('close-legend').addEventListener('click', () => {
-  document.getElementById('legend').style.display = 'none';
-});
+    document.getElementById('toggle-table').addEventListener('click', () => {
+      const container = document.getElementById('table-container');
+      const btn = document.getElementById('toggle-table');
+      const isVisible = container.style.display !== 'none';
+      container.style.display = isVisible ? 'none' : 'block';
+      btn.textContent = isVisible ? 'Show Table' : 'Hide Table';
+    });
 
-document.getElementById('close-table').addEventListener('click', () => {
-  document.getElementById('table-container').style.display = 'none';
-  document.getElementById('toggle-table').textContent = 'Show Table';
-});
+    document.getElementById('close-legend').addEventListener('click', () => {
+      document.getElementById('legend').style.display = 'none';
+    });
 
+    document.getElementById('close-table').addEventListener('click', () => {
+      document.getElementById('table-container').style.display = 'none';
+      document.getElementById('toggle-table').textContent = 'Show Table';
+    });
   </script>
-</body>
 </html>
