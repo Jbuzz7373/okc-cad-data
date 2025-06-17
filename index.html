@@ -289,16 +289,21 @@ toggleTableBtn.addEventListener('click', () => {
   const isVisible = tableContainer.style.display !== 'none';
   tableContainer.style.display = isVisible ? 'none' : 'block';
   toggleTableBtn.textContent = isVisible ? 'Show Table' : 'Hide Table';
-
-  // Toggle map height
   mapDiv.classList.toggle('fullscreen', !isVisible);
+  setTimeout(() => map.invalidateSize(), 310); // Wait for transition
 });
 
 
-    document.getElementById('close-table').addEventListener('click', () => {
-      document.getElementById('table-container').style.display = 'none';
-      document.getElementById('toggle-table').textContent = 'Show Table';
-    });
+
+
+
+document.getElementById('close-table').addEventListener('click', () => {
+  tableContainer.style.display = 'none';
+  toggleTableBtn.textContent = 'Show Table';
+  mapDiv.classList.add('fullscreen');
+  setTimeout(() => map.invalidateSize(), 310);
+});
+
 
     document.getElementById('close-legend').addEventListener('click', () => {
       document.getElementById('legend').style.display = 'none';
