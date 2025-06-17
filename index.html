@@ -139,7 +139,8 @@ calls
     const problem = (call.Problem || "").toLowerCase();
     if (
   problem.includes("911 wireless-no emerg") ||
-  problem.includes("911 hang up")
+  problem.includes("911 hang up") ||
+  problem.includes("911 TEXT")
 ) return;
 
     const maskedAddress = maskAddress(call.Address || "");
