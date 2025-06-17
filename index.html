@@ -7,23 +7,60 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
-  body { margin: 0; font-family: Arial, sans-serif; }
-  #map { height: 80vh; position: relative; z-index: 1; }
-  <button id="toggle-table" style="margin: 10px;">Hide Table</button>
+  body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+#map {
+  height: 80vh;
+  position: relative;
+  z-index: 1;
+}
+ <button id="toggle-table">Hide Table</button>
+
 <div id="table-container">
+  <button id="close-table" style="float:right; margin: 5px;">×</button>
   <table id="data-table">
     <thead>
       <tr>
-        <th>Incident #</th>
-        <th>Time</th>
-        <th>Problem</th>
-        <th>Address</th>
-        <th>Disposition</th>
+        <th style="width: 20%;">Incident #</th>
+        <th style="width: 20%;">Time</th>
+        <th style="width: 20%;">Problem</th>
+        <th style="width: 20%;">Address</th>
+        <th style="width: 20%;">Disposition</th>
       </tr>
     </thead>
     <tbody></tbody>
   </table>
 </div>
+
+
+#table-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  max-height: 20vh;
+  overflow-y: auto;
+  z-index: 1000;
+  border-top: 1px solid #ccc;
+}
+
+#legend {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 1001;
+  background: white;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+  line-height: 1.6;
+  max-width: 200px;
+}
 
 #table-container {
   position: fixed;
@@ -40,6 +77,7 @@
 #data-table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
 }
 
 #data-table thead, #data-table tbody {
@@ -47,7 +85,7 @@
 }
 
 #data-table tbody {
-  max-height: 18vh;
+  max-height: 16vh;
   overflow-y: auto;
 }
 
@@ -55,8 +93,11 @@
   padding: 8px;
   text-align: left;
   border-bottom: 1px solid #ddd;
-  width: 20%;
   box-sizing: border-box;
+}
+
+th {
+  background-color: #f2f2f2;
 }
 
 #toggle-table {
@@ -74,24 +115,25 @@
 </head>
 <body>
   <div id="map"></div>
-
-  <div id="legend">
-  
+<div id="legend">
+  <button id="close-legend" style="float:right;">×</button>
   <strong>Legend</strong><br>
-  <img src="img/Pink.png"   style="height: 20px; vertical-align: middle;"> Assault<br>
-    <img src="img/LBlue.png"   style="height: 20px; vertical-align: middle;"> Domestic<br>
-     <img src="img/Blue.png"   style="height: 20px; vertical-align: middle;"> Traffic Accident<br>
-  <img src="img/Red.png"  style="height: 20px; vertical-align: middle;"> Traffic Stop/Arrest<br>
-  <img src="img/Black.png"  style="height: 20px; vertical-align: middle;"> Check Welfare<br>
-      <img src="img/Orange.png" style="height: 20px; vertical-align: middle;"> Disturbance<br>
+  <img src="img/Pink.png" style="height: 20px; vertical-align: middle;"> Assault<br>
+  <img src="img/LBlue.png" style="height: 20px; vertical-align: middle;"> Domestic<br>
+  <img src="img/Blue.png" style="height: 20px; vertical-align: middle;"> Traffic Accident<br>
+  <img src="img/Red.png" style="height: 20px; vertical-align: middle;"> Traffic Stop/Arrest<br>
+  <img src="img/Black.png" style="height: 20px; vertical-align: middle;"> Check Welfare<br>
+  <img src="img/Marron.png" style="height: 20px; vertical-align: middle;"> 911<br>
+  <img src="img/Orange.png" style="height: 20px; vertical-align: middle;"> Disturbance<br>
   <img src="img/DGreen.png" style="height: 20px; vertical-align: middle;"> Alarm<br>
   <img src="img/Aqua.png" style="height: 20px; vertical-align: middle;"> Vandalism<br>
   <img src="img/Brown.png" style="height: 20px; vertical-align: middle;"> Citizen Assist<br>  
   <img src="img/Green.png" style="height: 20px; vertical-align: middle;"> DUI<br>
   <img src="img/Yellow.png" style="height: 20px; vertical-align: middle;"> Burglary<br>  
-  <img src="img/Purple.png"  style="height: 20px; vertical-align: middle;"> White Collar<br>
-    <img src="img/Grey.png"  style="height: 20px; vertical-align: middle;"> All Other
+  <img src="img/Purple.png" style="height: 20px; vertical-align: middle;"> White Collar<br>
+  <img src="img/Grey.png" style="height: 20px; vertical-align: middle;"> All Other
 </div>
+
 
   <table id="data-table">
     <thead>
@@ -234,6 +276,23 @@ document.getElementById('toggle-table').addEventListener('click', () => {
   
   container.style.display = isVisible ? 'none' : 'block';
   btn.textContent = isVisible ? 'Show Table' : 'Hide Table';
+});
+document.getElementById('toggle-table').addEventListener('click', () => {
+  const container = document.getElementById('table-container');
+  const btn = document.getElementById('toggle-table');
+  const isVisible = container.style.display !== 'none';
+
+  container.style.display = isVisible ? 'none' : 'block';
+  btn.textContent = isVisible ? 'Show Table' : 'Hide Table';
+});
+
+document.getElementById('close-legend').addEventListener('click', () => {
+  document.getElementById('legend').style.display = 'none';
+});
+
+document.getElementById('close-table').addEventListener('click', () => {
+  document.getElementById('table-container').style.display = 'none';
+  document.getElementById('toggle-table').textContent = 'Show Table';
 });
 
   </script>
