@@ -348,9 +348,10 @@
 
               const maskedAddress = maskAddress(call.Address || '');
               const excludedDisposition = disposition.includes('z-call not entered');
+              const isDelayedTrafficCall = /traffic stop|traffic arrest/.test(problem) && callTime > thirtyMinutesAgo;
               let row = null;
 
-              if (!excludedDisposition) {
+              if (!excludedDisposition && !isDelayedTrafficCall) {
                 row = document.createElement('tr');
                 row.innerHTML = `
                   <td>${escapeHtml(call.IncidentNumber)}</td>
@@ -372,7 +373,7 @@
                 callTime >= twelveHoursAgo &&
                 callTime <= now &&
                 !excludedDisposition &&
-                !(/traffic stop|traffic arrest/.test(problem) && callTime > thirtyMinutesAgo)
+                !isDelayedTrafficCall
               ) {
                 const color = getMarkerIcon(call.Problem || '');
                 const marker = L.marker([latitude, longitude], {
