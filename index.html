@@ -7,153 +7,53 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-    }
-
-    #map {
-      height: 73vh;
-      transition: height 0.3s ease;
-    }
-
-    #map.fullscreen {
-      height: 100vh;
-    }
-
+    body { margin: 0; font-family: Arial, sans-serif; }
+    #map { height: 73vh; transition: height 0.3s ease; }
+    #map.fullscreen { height: 100vh; }
     #legend {
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      background: white;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      font-size: 14px;
-      line-height: 1.6;
-      z-index: 1001;
-      max-width: 200px;
+      position: fixed; top: 10px; right: 10px; background: white; padding: 10px;
+      border: 1px solid #ccc; border-radius: 5px; font-size: 14px; line-height: 1.6;
+      z-index: 1001; max-width: 200px;
     }
-
-    #legend button {
-      float: right;
-      background: transparent;
-      border: none;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
+    #legend button { float: right; background: transparent; border: none; font-size: 16px; cursor: pointer; }
     #show-legend {
-      display: none;
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      z-index: 1000;
-      padding: 6px 12px;
-      font-size: 14px;
-      background-color: white;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      cursor: pointer;
+      display: none; position: fixed; top: 10px; right: 10px; z-index: 1000;
+      padding: 6px 12px; font-size: 14px; background-color: white;
+      border: 1px solid #ccc; border-radius: 5px; cursor: pointer;
     }
-
     #toggle-table {
-      position: fixed;
-      bottom: 28vh;
-      right: 10px;
-      z-index: 1001;
-      padding: 10px 14px;
-      font-size: 14px;
-      background-color: white;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      cursor: pointer;
+      position: fixed; bottom: 28vh; right: 10px; z-index: 1001; padding: 10px 14px;
+      font-size: 14px; background-color: white; border: 1px solid #ccc;
+      border-radius: 5px; cursor: pointer;
     }
-
     #table-container {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: white;
-      height: 27vh;
-      transition: height 0.3s ease, opacity 0.3s ease;
-      overflow: hidden;
-      z-index: 1000;
-      border-top: 1px solid #ccc;
-      opacity: 1;
+      position: fixed; bottom: 0; left: 0; right: 0; background: white; height: 27vh;
+      transition: height 0.3s ease, opacity 0.3s ease; overflow: hidden; z-index: 1000;
+      border-top: 1px solid #ccc; opacity: 1;
     }
-
-    #table-container.hidden {
-      height: 0;
-      opacity: 0;
-      pointer-events: none;
-    }
-
+    #table-container.hidden { height: 0; opacity: 0; pointer-events: none; }
     #close-table {
-      position: absolute;
-      top: 4px;
-      right: 8px;
-      font-size: 18px;
-      background: transparent;
-      border: none;
-      cursor: pointer;
+      position: absolute; top: 4px; right: 8px; font-size: 18px;
+      background: transparent; border: none; cursor: pointer;
     }
-
-    #data-table {
-      width: 100%;
-      border-collapse: collapse;
-      table-layout: fixed;
+    #data-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    #data-table thead, #data-table tbody { display: table; width: 100%; table-layout: fixed; }
+    #data-table tbody { display: block; max-height: 23vh; overflow-y: auto; }
+    #data-table tr { display: table; width: 100%; table-layout: fixed; }
+    #data-table th, #data-table td {
+      padding: 8px; text-align: left; border-bottom: 1px solid #ddd;
+      box-sizing: border-box; vertical-align: top; overflow-wrap: anywhere;
     }
-
-    #data-table thead,
-    #data-table tbody {
-      display: table;
-      width: 100%;
-      table-layout: fixed;
-    }
-
-    #data-table tbody {
-      display: block;
-      max-height: 23vh;
-      overflow-y: auto;
-    }
-
-    #data-table tr {
-      display: table;
-      width: 100%;
-      table-layout: fixed;
-    }
-
-    #data-table th,
-    #data-table td {
-      padding: 8px;
-      text-align: left;
-      border-bottom: 1px solid #ddd;
-      box-sizing: border-box;
-      vertical-align: top;
-      overflow-wrap: anywhere;
-    }
-
     #data-table th:nth-child(1), #data-table td:nth-child(1) { width: 13%; }
     #data-table th:nth-child(2), #data-table td:nth-child(2) { width: 15%; }
     #data-table th:nth-child(3), #data-table td:nth-child(3) { width: 14%; }
     #data-table th:nth-child(4), #data-table td:nth-child(4) { width: 17%; }
     #data-table th:nth-child(5), #data-table td:nth-child(5) { width: 14%; }
     #data-table th:nth-child(6), #data-table td:nth-child(6) { width: 27%; }
-
-    th {
-      background-color: #f2f2f2;
-    }
-
+    th { background-color: #f2f2f2; }
     .cad-comments {
-      margin-top: 8px;
-      padding-top: 8px;
-      border-top: 1px solid #ccc;
-      max-height: 220px;
-      overflow-y: auto;
-      white-space: normal;
-      line-height: 1.35;
+      margin-top: 8px; padding-top: 8px; border-top: 1px solid #ccc;
+      max-height: 220px; overflow-y: auto; white-space: normal; line-height: 1.35;
     }
   </style>
 </head>
@@ -199,10 +99,7 @@
   </div>
 
   <script>
-    const map = L.map('map', {
-      minZoom: 10,
-      maxZoom: 15
-    }).setView([35.4676, -97.5164], 11);
+    const map = L.map('map', { minZoom: 10, maxZoom: 15 }).setView([35.4676, -97.5164], 11);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
@@ -213,9 +110,7 @@
     const toggleTableBtn = document.getElementById('toggle-table');
     const closeTableBtn = document.getElementById('close-table');
 
-    function resizeMapAfterTransition() {
-      setTimeout(() => map.invalidateSize(), 310);
-    }
+    function resizeMapAfterTransition() { setTimeout(() => map.invalidateSize(), 310); }
 
     function hideTable() {
       tableContainer.classList.add('hidden');
@@ -232,10 +127,8 @@
     }
 
     toggleTableBtn.addEventListener('click', () => {
-      const isHidden = tableContainer.classList.contains('hidden');
-      isHidden ? showTable() : hideTable();
+      tableContainer.classList.contains('hidden') ? showTable() : hideTable();
     });
-
     closeTableBtn.addEventListener('click', hideTable);
 
     document.getElementById('close-legend').addEventListener('click', () => {
@@ -335,17 +228,11 @@
             .sort((a, b) => new Date(b.ResponseDate) - new Date(a.ResponseDate))
             .forEach(call => {
               if (!call || typeof call !== 'object' || Array.isArray(call)) return;
+              if (!String(call.Problem ?? '').trim()) return;
 
               const callTime = new Date(call.ResponseDate);
               const disposition = (call.Disposition || '').toLowerCase();
               const problem = (call.Problem || '').toLowerCase();
-
-              if (
-                problem.includes('911 wireless-no emerg') ||
-                problem.includes('911 hang up') ||
-                problem.includes('911 text')
-              ) return;
-
               const maskedAddress = maskAddress(call.Address || '');
               const excludedDisposition = disposition.includes('z-call not entered');
               const isDelayedTrafficCall = /traffic stop|traffic arrest/.test(problem) && callTime > thirtyMinutesAgo;
@@ -375,9 +262,8 @@
                 !excludedDisposition &&
                 !isDelayedTrafficCall
               ) {
-                const color = getMarkerIcon(call.Problem || '');
                 const marker = L.marker([latitude, longitude], {
-                  icon: createIcon(color)
+                  icon: createIcon(getMarkerIcon(call.Problem || ''))
                 }).addTo(map);
 
                 marker.bindPopup(`
@@ -389,9 +275,7 @@
                     ${escapeHtml(call.IncidentNumber)}
                     ${formatComments(call.Comments)}
                   </div>
-                `, {
-                  maxWidth: 450
-                });
+                `, { maxWidth: 450 });
 
                 markers.push(marker);
 
