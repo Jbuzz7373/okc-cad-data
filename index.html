@@ -103,11 +103,30 @@
       if (badge) return `#${badge}`;
       return '';
     }
+    function flattenCalls(value, output) {
+      output = output || [];
+      if (!Array.isArray(value)) return output;
+      value.forEach(item => {
+        if (Array.isArray(item)) flattenCalls(item, output);
+        else output.push(item);
+      });
+      return output;
+    }
     let markers = [];
     function loadCalls() {
       fetch('CadCalls.json?_=' + new Date().getTime()).then(response => response.json()).then(calls => {
-        while (Array.isArray(calls) && calls.length === 1 && Array.isArray(calls[0])) calls = calls[0];
         if (!Array.isArray(calls)) throw new Error('CadCalls.json did not contain an array of call records.');
+        calls = flattenCalls(calls);
+
+        const uniqueCalls = new Map();
+        calls.forEach(call => {
+          if (!call || typeof call !== 'object' || Array.isArray(call)) return;
+          const incident = String(call.IncidentNumber ?? '').trim();
+          if (!incident) return;
+          uniqueCalls.set(incident, call);
+        });
+        calls = Array.from(uniqueCalls.values());
+
         markers.forEach(m => map.removeLayer(m)); markers = [];
         const tbody = document.querySelector('#data-table tbody'); tbody.innerHTML = '';
         const now = new Date(); const twelveHoursAgo = new Date(now.getTime() - 12 * 60 * 60 * 1000);
