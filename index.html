@@ -8,18 +8,18 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     body { margin: 0; font-family: Arial, sans-serif; }
-    #map { height: 73vh; transition: height 0.3s ease; }
+    #map { height: 68vh; transition: height 0.3s ease; }
     #map.fullscreen { height: 100vh; }
     #legend { position: fixed; top: 10px; right: 10px; background: white; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; line-height: 1.6; z-index: 1001; max-width: 200px; }
     #legend button { float: right; background: transparent; border: none; font-size: 16px; cursor: pointer; }
     #show-legend { display: none; position: fixed; top: 10px; right: 10px; z-index: 1000; padding: 6px 12px; font-size: 14px; background-color: white; border: 1px solid #ccc; border-radius: 5px; cursor: pointer; }
-    #toggle-table { position: fixed; bottom: 28vh; right: 10px; z-index: 1001; padding: 10px 14px; font-size: 14px; background-color: white; border: 1px solid #ccc; border-radius: 5px; cursor: pointer; }
-    #table-container { position: fixed; bottom: 0; left: 0; right: 0; background: white; height: 27vh; transition: height 0.3s ease, opacity 0.3s ease; overflow: hidden; z-index: 1000; border-top: 1px solid #ccc; opacity: 1; }
+    #toggle-table { position: fixed; bottom: 33vh; right: 10px; z-index: 1001; padding: 10px 14px; font-size: 14px; background-color: white; border: 1px solid #ccc; border-radius: 5px; cursor: pointer; }
+    #table-container { position: fixed; bottom: 0; left: 0; right: 0; background: white; height: 32vh; transition: height 0.3s ease, opacity 0.3s ease; overflow: hidden; z-index: 1000; border-top: 1px solid #ccc; opacity: 1; }
     #table-container.hidden { height: 0; opacity: 0; pointer-events: none; }
     #close-table { position: absolute; top: 4px; right: 8px; font-size: 18px; background: transparent; border: none; cursor: pointer; }
     #data-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 12.5px; }
     #data-table thead, #data-table tbody { display: table; width: 100%; table-layout: fixed; }
-    #data-table tbody { display: block; max-height: 23vh; overflow-y: auto; }
+    #data-table tbody { display: block; max-height: 28vh; overflow-y: auto; }
     #data-table tr { display: table; width: 100%; table-layout: fixed; }
     #data-table th, #data-table td { padding: 7px; text-align: left; border-bottom: 1px solid #ddd; box-sizing: border-box; vertical-align: top; overflow-wrap: anywhere; }
     #data-table th:nth-child(1), #data-table td:nth-child(1) { width: 10%; }
