@@ -24,12 +24,11 @@
     #data-table th, #data-table td { padding: 7px; text-align: left; border-bottom: 1px solid #ddd; box-sizing: border-box; vertical-align: top; overflow-wrap: anywhere; }
     #data-table th:nth-child(1), #data-table td:nth-child(1) { width: 10%; }
     #data-table th:nth-child(2), #data-table td:nth-child(2) { width: 12%; }
-    #data-table th:nth-child(3), #data-table td:nth-child(3) { width: 15%; }
-    #data-table th:nth-child(4), #data-table td:nth-child(4) { width: 15%; }
-    #data-table th:nth-child(5), #data-table td:nth-child(5) { width: 13%; }
-    #data-table th:nth-child(6), #data-table td:nth-child(6) { width: 17%; }
-    #data-table th:nth-child(7), #data-table td:nth-child(7) { width: 8%; }
-    #data-table th:nth-child(8), #data-table td:nth-child(8) { width: 10%; }
+    #data-table th:nth-child(3), #data-table td:nth-child(3) { width: 22%; }
+    #data-table th:nth-child(4), #data-table td:nth-child(4) { width: 16%; }
+    #data-table th:nth-child(5), #data-table td:nth-child(5) { width: 22%; }
+    #data-table th:nth-child(6), #data-table td:nth-child(6) { width: 8%; }
+    #data-table th:nth-child(7), #data-table td:nth-child(7) { width: 10%; }
     th { background-color: #f2f2f2; }
     .secondary { color: #555; font-size: 12px; margin-top: 3px; }
     .comments-cell { white-space: pre-line; }
@@ -58,7 +57,7 @@
   <div id="table-container">
     <button id="close-table">×</button>
     <table id="data-table">
-      <thead><tr><th>Incident #</th><th>Time</th><th>Problem</th><th>Address</th><th>Disposition</th><th>Comments</th><th>Unit</th><th>Officer</th></tr></thead>
+      <thead><tr><th>Incident #</th><th>Time</th><th>Problem</th><th>Address</th><th>Comments</th><th>Unit</th><th>Officer</th></tr></thead>
       <tbody></tbody>
     </table>
   </div>
@@ -145,7 +144,7 @@
           const primaryUnit = String(call.PrimaryUnit ?? '').trim();
           const officer = officerDisplay(call);
           const row = document.createElement('tr');
-          row.innerHTML = `<td>${escapeHtml(call.IncidentNumber)}</td><td>${escapeHtml(callTime.toLocaleString())}</td><td>${escapeHtml(call.Problem)}${description ? `<div class="secondary">${escapeHtml(description)}</div>` : ''}</td><td>${escapeHtml(safeAddress)}</td><td>${escapeHtml(call.Disposition)}${callCompleteInfo ? `<div class="secondary">${escapeHtml(callCompleteInfo)}</div>` : ''}</td><td class="comments-cell">${escapeHtml(comments)}</td><td>${escapeHtml(primaryUnit)}</td><td>${escapeHtml(officer)}</td>`;
+          row.innerHTML = `<td>${escapeHtml(call.IncidentNumber)}</td><td>${escapeHtml(callTime.toLocaleString())}</td><td>${escapeHtml(call.Problem)}${description ? `<div class="secondary">${escapeHtml(description)}</div>` : ''}${call.Disposition ? `<div class="secondary">${escapeHtml(call.Disposition)}</div>` : ''}${callCompleteInfo ? `<div class="secondary">${escapeHtml(callCompleteInfo)}</div>` : ''}</td><td>${escapeHtml(safeAddress)}</td><td class="comments-cell">${escapeHtml(comments)}</td><td>${escapeHtml(primaryUnit)}</td><td>${escapeHtml(officer)}</td>`;
           tbody.appendChild(row);
           const latitude = Number(call.Latitude); const longitude = Number(call.Longitude);
           const hasCoordinates = Number.isFinite(latitude) && Number.isFinite(longitude);
