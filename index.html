@@ -10,51 +10,32 @@
     body { margin: 0; font-family: Arial, sans-serif; }
     #map { height: 73vh; transition: height 0.3s ease; }
     #map.fullscreen { height: 100vh; }
-    #legend {
-      position: fixed; top: 10px; right: 10px; background: white; padding: 10px;
-      border: 1px solid #ccc; border-radius: 5px; font-size: 14px; line-height: 1.6;
-      z-index: 1001; max-width: 200px;
-    }
+    #legend { position: fixed; top: 10px; right: 10px; background: white; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; line-height: 1.6; z-index: 1001; max-width: 200px; }
     #legend button { float: right; background: transparent; border: none; font-size: 16px; cursor: pointer; }
-    #show-legend {
-      display: none; position: fixed; top: 10px; right: 10px; z-index: 1000;
-      padding: 6px 12px; font-size: 14px; background-color: white;
-      border: 1px solid #ccc; border-radius: 5px; cursor: pointer;
-    }
-    #toggle-table {
-      position: fixed; bottom: 28vh; right: 10px; z-index: 1001; padding: 10px 14px;
-      font-size: 14px; background-color: white; border: 1px solid #ccc;
-      border-radius: 5px; cursor: pointer;
-    }
-    #table-container {
-      position: fixed; bottom: 0; left: 0; right: 0; background: white; height: 27vh;
-      transition: height 0.3s ease, opacity 0.3s ease; overflow: hidden; z-index: 1000;
-      border-top: 1px solid #ccc; opacity: 1;
-    }
+    #show-legend { display: none; position: fixed; top: 10px; right: 10px; z-index: 1000; padding: 6px 12px; font-size: 14px; background-color: white; border: 1px solid #ccc; border-radius: 5px; cursor: pointer; }
+    #toggle-table { position: fixed; bottom: 28vh; right: 10px; z-index: 1001; padding: 10px 14px; font-size: 14px; background-color: white; border: 1px solid #ccc; border-radius: 5px; cursor: pointer; }
+    #table-container { position: fixed; bottom: 0; left: 0; right: 0; background: white; height: 27vh; transition: height 0.3s ease, opacity 0.3s ease; overflow: hidden; z-index: 1000; border-top: 1px solid #ccc; opacity: 1; }
     #table-container.hidden { height: 0; opacity: 0; pointer-events: none; }
-    #close-table {
-      position: absolute; top: 4px; right: 8px; font-size: 18px;
-      background: transparent; border: none; cursor: pointer;
-    }
-    #data-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    #close-table { position: absolute; top: 4px; right: 8px; font-size: 18px; background: transparent; border: none; cursor: pointer; }
+    #data-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 13px; }
     #data-table thead, #data-table tbody { display: table; width: 100%; table-layout: fixed; }
     #data-table tbody { display: block; max-height: 23vh; overflow-y: auto; }
     #data-table tr { display: table; width: 100%; table-layout: fixed; }
-    #data-table th, #data-table td {
-      padding: 8px; text-align: left; border-bottom: 1px solid #ddd;
-      box-sizing: border-box; vertical-align: top; overflow-wrap: anywhere;
-    }
-    #data-table th:nth-child(1), #data-table td:nth-child(1) { width: 16%; }
-    #data-table th:nth-child(2), #data-table td:nth-child(2) { width: 19%; }
-    #data-table th:nth-child(3), #data-table td:nth-child(3) { width: 21%; }
-    #data-table th:nth-child(4), #data-table td:nth-child(4) { width: 24%; }
-    #data-table th:nth-child(5), #data-table td:nth-child(5) { width: 20%; }
+    #data-table th, #data-table td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; box-sizing: border-box; vertical-align: top; overflow-wrap: anywhere; }
+    #data-table th:nth-child(1), #data-table td:nth-child(1) { width: 12%; }
+    #data-table th:nth-child(2), #data-table td:nth-child(2) { width: 15%; }
+    #data-table th:nth-child(3), #data-table td:nth-child(3) { width: 19%; }
+    #data-table th:nth-child(4), #data-table td:nth-child(4) { width: 19%; }
+    #data-table th:nth-child(5), #data-table td:nth-child(5) { width: 15%; }
+    #data-table th:nth-child(6), #data-table td:nth-child(6) { width: 20%; }
     th { background-color: #f2f2f2; }
+    .secondary { color: #555; font-size: 12px; margin-top: 3px; }
+    .comments-cell { white-space: pre-line; }
+    .popup-label { font-weight: bold; }
   </style>
 </head>
 <body>
   <div id="map"></div>
-
   <div id="legend">
     <button id="close-legend">×</button>
     <strong>Legend</strong><br>
@@ -70,96 +51,33 @@
     <img src="img/Purple.png" style="height: 20px;"> White Collar<br>
     <img src="img/Grey.png" style="height: 20px;"> All Other
   </div>
-
   <button id="show-legend">Show Legend</button>
   <button id="toggle-table">Hide Table</button>
-
   <div id="table-container">
     <button id="close-table">×</button>
     <table id="data-table">
-      <thead>
-        <tr>
-          <th>Incident #</th>
-          <th>Time</th>
-          <th>Problem</th>
-          <th>Address</th>
-          <th>Disposition</th>
-        </tr>
-      </thead>
+      <thead><tr><th>Incident #</th><th>Time</th><th>Problem</th><th>Address</th><th>Disposition</th><th>Comments</th></tr></thead>
       <tbody></tbody>
     </table>
   </div>
-
   <script>
     const map = L.map('map', { minZoom: 10, maxZoom: 15 }).setView([35.4676, -97.5164], 11);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
-
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors' }).addTo(map);
     const mapDiv = document.getElementById('map');
     const tableContainer = document.getElementById('table-container');
     const toggleTableBtn = document.getElementById('toggle-table');
     const closeTableBtn = document.getElementById('close-table');
-
     function resizeMapAfterTransition() { setTimeout(() => map.invalidateSize(), 310); }
-
-    function hideTable() {
-      tableContainer.classList.add('hidden');
-      mapDiv.classList.add('fullscreen');
-      toggleTableBtn.textContent = 'Show Table';
-      resizeMapAfterTransition();
-    }
-
-    function showTable() {
-      tableContainer.classList.remove('hidden');
-      mapDiv.classList.remove('fullscreen');
-      toggleTableBtn.textContent = 'Hide Table';
-      resizeMapAfterTransition();
-    }
-
-    toggleTableBtn.addEventListener('click', () => {
-      tableContainer.classList.contains('hidden') ? showTable() : hideTable();
-    });
+    function hideTable() { tableContainer.classList.add('hidden'); mapDiv.classList.add('fullscreen'); toggleTableBtn.textContent = 'Show Table'; resizeMapAfterTransition(); }
+    function showTable() { tableContainer.classList.remove('hidden'); mapDiv.classList.remove('fullscreen'); toggleTableBtn.textContent = 'Hide Table'; resizeMapAfterTransition(); }
+    toggleTableBtn.addEventListener('click', () => { tableContainer.classList.contains('hidden') ? showTable() : hideTable(); });
     closeTableBtn.addEventListener('click', hideTable);
-
-    document.getElementById('close-legend').addEventListener('click', () => {
-      document.getElementById('legend').style.display = 'none';
-      document.getElementById('show-legend').style.display = 'block';
-    });
-
-    document.getElementById('show-legend').addEventListener('click', () => {
-      document.getElementById('legend').style.display = 'block';
-      document.getElementById('show-legend').style.display = 'none';
-    });
-
-    function escapeHtml(value) {
-      return String(value ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-    }
-
-    function maskAddress(address) {
-      return String(address || '')
-        .replace(/\b(\d{1,5})(?=(-\d{1,5}))/g, m => m.slice(0, Math.max(1, m.length - 2)) + 'XX')
-        .replace(/\b(\d{5})(?=\s)/g, m => m.slice(0, 3) + 'XX')
-        .replace(/\b(\d{4})(?=\s)/g, m => m.slice(0, 2) + 'XX')
-        .replace(/\b(\d{3})(?=\s)/g, m => m.slice(0, 1) + 'XX')
-        .replace(/\b(\d{2})(?=\s)/g, 'XX')
-        .replace(/\b(\d{1})(?=\s)/g, 'X');
-    }
-
-    function isSensitiveCall(problem) {
-      return /domestic|\brape\b|sexual|sex assault|molest|child abuse|child neglect|child sexual|child porn|child exploitation/i.test(problem);
-    }
-
-    function isOfficerLocationCall(problem) {
-      return /traffic stop|traffic arrest/i.test(problem);
-    }
-
+    document.getElementById('close-legend').addEventListener('click', () => { document.getElementById('legend').style.display = 'none'; document.getElementById('show-legend').style.display = 'block'; });
+    document.getElementById('show-legend').addEventListener('click', () => { document.getElementById('legend').style.display = 'block'; document.getElementById('show-legend').style.display = 'none'; });
+    function escapeHtml(value) { return String(value ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;'); }
+    function escapeMultiline(value) { return escapeHtml(value).replace(/\r?\n/g, '<br>'); }
+    function isSensitiveCall(problem) { return /domestic|\brape\b|sexual|sex assault|molest|child abuse|child neglect|child sexual|child porn|child exploitation/i.test(problem); }
+    function isOfficerLocationCall(problem) { return /traffic stop|traffic arrest/i.test(problem); }
     function getMarkerIcon(problem) {
       if (/A\.D\.W\.|assault/i.test(problem)) return 'Pink';
       if (/accident/i.test(problem)) return 'Blue';
@@ -174,97 +92,51 @@
       if (/white collar/i.test(problem)) return 'Purple';
       return 'Grey';
     }
-
-    function createIcon(name) {
-      return L.icon({
-        iconUrl: `img/${name}.png`,
-        shadowUrl: 'img/marker-shadow.png',
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41]
-      });
-    }
-
+    function createIcon(name) { return L.icon({ iconUrl: `img/${name}.png`, shadowUrl: 'img/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] }); }
     let markers = [];
-
     function loadCalls() {
-      fetch('CadCalls.json?_=' + new Date().getTime())
-        .then(response => response.json())
-        .then(calls => {
-          while (Array.isArray(calls) && calls.length === 1 && Array.isArray(calls[0])) {
-            calls = calls[0];
+      fetch('CadCalls.json?_=' + new Date().getTime()).then(response => response.json()).then(calls => {
+        while (Array.isArray(calls) && calls.length === 1 && Array.isArray(calls[0])) calls = calls[0];
+        if (!Array.isArray(calls)) throw new Error('CadCalls.json did not contain an array of call records.');
+        markers.forEach(m => map.removeLayer(m)); markers = [];
+        const tbody = document.querySelector('#data-table tbody'); tbody.innerHTML = '';
+        const now = new Date(); const twelveHoursAgo = new Date(now.getTime() - 12 * 60 * 60 * 1000);
+        calls.sort((a, b) => new Date(b.ResponseDate) - new Date(a.ResponseDate)).forEach(call => {
+          if (!call || typeof call !== 'object' || Array.isArray(call)) return;
+          if (!String(call.Problem ?? '').trim()) return;
+          const callTime = new Date(call.ResponseDate);
+          const disposition = (call.Disposition || '').toLowerCase();
+          const problem = (call.Problem || '').toLowerCase();
+          if (isSensitiveCall(problem) || isOfficerLocationCall(problem)) return;
+          if (disposition.includes('z-call not entered')) return;
+          const safeAddress = String(call.Address ?? '').trim();
+          const description = String(call.Description ?? '').trim();
+          const callCompleteInfo = String(call.CallCompleteInfo ?? '').trim();
+          const comments = String(call.Comments ?? '').trim();
+          const row = document.createElement('tr');
+          row.innerHTML = `<td>${escapeHtml(call.IncidentNumber)}</td><td>${escapeHtml(callTime.toLocaleString())}</td><td>${escapeHtml(call.Problem)}${description ? `<div class="secondary">${escapeHtml(description)}</div>` : ''}</td><td>${escapeHtml(safeAddress)}</td><td>${escapeHtml(call.Disposition)}${callCompleteInfo ? `<div class="secondary">${escapeHtml(callCompleteInfo)}</div>` : ''}</td><td class="comments-cell">${escapeHtml(comments)}</td>`;
+          tbody.appendChild(row);
+          const latitude = Number(call.Latitude); const longitude = Number(call.Longitude);
+          const hasCoordinates = Number.isFinite(latitude) && Number.isFinite(longitude);
+          if (hasCoordinates && callTime >= twelveHoursAgo && callTime <= now) {
+            const marker = L.marker([latitude, longitude], { icon: createIcon(getMarkerIcon(call.Problem || '')) }).addTo(map);
+            const popupLines = [
+              `<b>${escapeHtml(callTime.toLocaleString())}</b>`,
+              `<span class="popup-label">Problem:</span> ${escapeHtml(call.Problem)}`,
+              description ? `<span class="popup-label">Priority:</span> ${escapeHtml(description)}` : '',
+              safeAddress ? `<span class="popup-label">Location:</span> ${escapeHtml(safeAddress)}` : '',
+              call.Disposition ? `<span class="popup-label">Disposition:</span> ${escapeHtml(call.Disposition)}` : '',
+              callCompleteInfo ? `<span class="popup-label">Call Complete:</span> ${escapeHtml(callCompleteInfo)}` : '',
+              comments ? `<span class="popup-label">Comments:</span><br>${escapeMultiline(comments)}` : '',
+              `<span class="popup-label">Incident:</span> ${escapeHtml(call.IncidentNumber)}`
+            ].filter(Boolean).join('<br>');
+            marker.bindPopup(`<div style="font-size: 15px; min-width: 260px; max-width: 420px;">${popupLines}</div>`, { maxWidth: 450 });
+            markers.push(marker);
+            row.onclick = () => { map.setView([latitude, longitude], 15); marker.openPopup(); };
           }
-
-          if (!Array.isArray(calls)) {
-            throw new Error('CadCalls.json did not contain an array of call records.');
-          }
-
-          markers.forEach(m => map.removeLayer(m));
-          markers = [];
-
-          const tbody = document.querySelector('#data-table tbody');
-          tbody.innerHTML = '';
-
-          const now = new Date();
-          const twelveHoursAgo = new Date(now.getTime() - 12 * 60 * 60 * 1000);
-
-          calls
-            .sort((a, b) => new Date(b.ResponseDate) - new Date(a.ResponseDate))
-            .forEach(call => {
-              if (!call || typeof call !== 'object' || Array.isArray(call)) return;
-              if (!String(call.Problem ?? '').trim()) return;
-
-              const callTime = new Date(call.ResponseDate);
-              const disposition = (call.Disposition || '').toLowerCase();
-              const problem = (call.Problem || '').toLowerCase();
-
-              if (isSensitiveCall(problem) || isOfficerLocationCall(problem)) return;
-
-              const maskedAddress = maskAddress(call.Address || '');
-              const excludedDisposition = disposition.includes('z-call not entered');
-              if (excludedDisposition) return;
-
-              const row = document.createElement('tr');
-              row.innerHTML = `
-                <td>${escapeHtml(call.IncidentNumber)}</td>
-                <td>${escapeHtml(callTime.toLocaleString())}</td>
-                <td>${escapeHtml(call.Problem)}</td>
-                <td>${escapeHtml(maskedAddress)}</td>
-                <td>${escapeHtml(call.Disposition)}</td>
-              `;
-              tbody.appendChild(row);
-
-              const latitude = Number(call.Latitude);
-              const longitude = Number(call.Longitude);
-              const hasCoordinates = Number.isFinite(latitude) && Number.isFinite(longitude);
-
-              if (hasCoordinates && callTime >= twelveHoursAgo && callTime <= now) {
-                const marker = L.marker([latitude, longitude], {
-                  icon: createIcon(getMarkerIcon(call.Problem || ''))
-                }).addTo(map);
-
-                marker.bindPopup(`
-                  <div style="font-size: 16px; min-width: 240px;">
-                    <b>${escapeHtml(callTime.toLocaleString())}</b><br>
-                    ${escapeHtml(call.Problem)}<br>
-                    ${escapeHtml(maskedAddress)}<br>
-                    ${escapeHtml(call.Disposition)}<br>
-                    ${escapeHtml(call.IncidentNumber)}
-                  </div>
-                `, { maxWidth: 450 });
-
-                markers.push(marker);
-                row.onclick = () => {
-                  map.setView([latitude, longitude], 15);
-                  marker.openPopup();
-                };
-              }
-            });
-        })
-        .catch(error => console.error('Unable to load CAD calls:', error));
+        });
+      }).catch(error => console.error('Unable to load CAD calls:', error));
     }
-
     loadCalls();
     setInterval(loadCalls, 180000);
   </script>
